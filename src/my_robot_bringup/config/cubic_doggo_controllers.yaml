@@ -1,0 +1,34 @@
+# This config file is used by ros2_control
+controller_manager:
+  ros__parameters:
+    update_rate: 100  # Hz
+
+    # Replace the 4 individual ones with this:
+    all_legs_controller:
+      type: joint_trajectory_controller/JointTrajectoryController
+
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+
+all_legs_controller:
+  ros__parameters:
+    joints:
+      - servo1_servo1_padding_FL
+      - servo2_servo2_padding_FL
+      - servo3_calfFeet_FL
+      - servo1_servo1_padding_FR
+      - servo2_servo2_padding_FR
+      - servo3_calfFeet_FR
+      - servo1_servo1_padding_BL
+      - servo2_servo2_padding_BL
+      - servo3_calfFeet_BL
+      - servo1_servo1_padding_BR
+      - servo2_servo2_padding_BR
+      - servo3_calfFeet_BR
+    command_interfaces:
+      - position
+    state_interfaces:
+      - position
+      - velocity
+    allow_nonzero_velocity_at_trajectory_end: true
+

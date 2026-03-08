@@ -1,0 +1,9 @@
+<library path="cubic_doggo_hardware_interface">
+    <class name="cubic_doggo_namespace/HardwareInterfaceU2D2_cubic_doggo"
+           type="cubic_doggo_namespace::HardwareInterfaceU2D2_cubic_doggo"
+           base_class_type="hardware_interface::SystemInterface">
+        <description>
+            Hardware interface for the base controlling 3 dynamixel xl430 servos using U2D2
+        </description>
+    </class>
+</library>

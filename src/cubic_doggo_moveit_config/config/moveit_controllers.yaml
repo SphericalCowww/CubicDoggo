@@ -1,0 +1,27 @@
+moveit_controller_manager: moveit_simple_controller_manager/MoveItSimpleControllerManager
+
+moveit_simple_controller_manager:
+  controller_names:
+    - all_legs_controller
+
+  all_legs_controller:
+    type: FollowJointTrajectory
+    action_ns: follow_joint_trajectory
+    default: true
+    joints:
+      - servo1_servo1_padding_FL
+      - servo2_servo2_padding_FL
+      - servo3_calfFeet_FL
+      - servo1_servo1_padding_FR
+      - servo2_servo2_padding_FR
+      - servo3_calfFeet_FR
+      - servo1_servo1_padding_BL
+      - servo2_servo2_padding_BL
+      - servo3_calfFeet_BL
+      - servo1_servo1_padding_BR
+      - servo2_servo2_padding_BR
+      - servo3_calfFeet_BR
+
+
+
+
