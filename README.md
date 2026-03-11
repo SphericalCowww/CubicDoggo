@@ -1,6 +1,10 @@
-# Development for a 12 Degrees-of-Freedom 4-Legged Robot
+# Development for a 12-DOF 4-Legged Robot
 
-Derivation from the following <a href="https://github.com/SphericalCowww/ROS_leggedRobot_testBed">GitHub Repository</a>.
+Derivation of the <a href="https://github.com/SphericalCowww/ROS_leggedRobot_testBed">GitHub Repository</a>:
+
+<img src="https://github.com/SphericalCowww/ROS_Cubic_Doggo/blob/main/CubicDoggo.png" width="300">
+
+Goal 1: Resolving the walking gait. The current walking gait (<a href="https://www.reddit.com/r/robotics/comments/1rouerc/first_time_building_a_hobbyist_robot_from_scratch/">link</a>) is already showing the problem of not being able to lift the feet in action. Perhaps this can be resolved by gait optimization, but it can also be limited intrinsic motor speed, maximum current from the batteries, the feet being too heavy, or just not having enough friction on the feet.
 
 ## Training with Isaac Sim
 
