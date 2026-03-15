@@ -10,61 +10,61 @@ default_acceleration_scaling_factor: 0.1
 joint_limits:
   servo1_servo1_padding_BL:
     has_velocity_limits: true
-    max_velocity: 20.0
+    max_velocity: 50.0
     has_acceleration_limits: true
-    max_acceleration: 20.0
+    max_acceleration: 50.0
   servo1_servo1_padding_BR:
     has_velocity_limits: true
-    max_velocity: 20.0
+    max_velocity: 50.0
     has_acceleration_limits: true
-    max_acceleration: 20.0
+    max_acceleration: 50.0
   servo1_servo1_padding_FL:
     has_velocity_limits: true
-    max_velocity: 20.0
+    max_velocity: 50.0
     has_acceleration_limits: true
-    max_acceleration: 20.0
+    max_acceleration: 50.0
   servo1_servo1_padding_FR:
     has_velocity_limits: true
-    max_velocity: 20.0
+    max_velocity: 50.0
     has_acceleration_limits: true
-    max_acceleration: 20.0
+    max_acceleration: 50.0
   servo2_servo2_padding_BL:
     has_velocity_limits: true
-    max_velocity: 20.0
+    max_velocity: 50.0
     has_acceleration_limits: true
-    max_acceleration: 20.0
+    max_acceleration: 50.0
   servo2_servo2_padding_BR:
     has_velocity_limits: true
-    max_velocity: 20.0
+    max_velocity: 50.0
     has_acceleration_limits: true
-    max_acceleration: 20.0
+    max_acceleration: 50.0
   servo2_servo2_padding_FL:
     has_velocity_limits: true
-    max_velocity: 20.0
+    max_velocity: 50.0
     has_acceleration_limits: true
-    max_acceleration: 20.0
+    max_acceleration: 50.0
   servo2_servo2_padding_FR:
     has_velocity_limits: true
-    max_velocity: 20.0
+    max_velocity: 50.0
     has_acceleration_limits: true
-    max_acceleration: 20.0
+    max_acceleration: 50.0
   servo3_calfFeet_BL:
     has_velocity_limits: true
-    max_velocity: 20.0
+    max_velocity: 50.0
     has_acceleration_limits: true
-    max_acceleration: 20.0
+    max_acceleration: 50.0
   servo3_calfFeet_BR:
     has_velocity_limits: true
-    max_velocity: 20.0
+    max_velocity: 50.0
     has_acceleration_limits: true
-    max_acceleration: 20.0
+    max_acceleration: 50.0
   servo3_calfFeet_FL:
     has_velocity_limits: true
-    max_velocity: 20.0
+    max_velocity: 50.0
     has_acceleration_limits: true
-    max_acceleration: 20.0
+    max_acceleration: 50.0
   servo3_calfFeet_FR:
     has_velocity_limits: true
-    max_velocity: 20.0
+    max_velocity: 50.0
     has_acceleration_limits: true
-    max_acceleration: 20.0
+    max_acceleration: 50.0

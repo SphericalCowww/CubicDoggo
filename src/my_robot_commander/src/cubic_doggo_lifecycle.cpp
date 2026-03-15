@@ -36,12 +36,12 @@ using ros_array    = example_interfaces::msg::Float64MultiArray;
 using custom_array = my_robot_interface::msg::CubicDoggoLegPoseTarget;
 using ros_bool     = example_interfaces::msg::Bool;
 
-const double DEFAULT_VEL_SCALE = 0.5;
-const double DEFAULT_ACC_SCALE = 0.1;
+const double DEFAULT_VEL_SCALE = 0.2;
+const double DEFAULT_ACC_SCALE = 0.05;
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-class MyRobotLifecycleManager : public rclcpp_lifecycle::LifecycleNode {
+class CubicDoggoLifecycleManager : public rclcpp_lifecycle::LifecycleNode {
 public:
-    explicit MyRobotLifecycleManager(const rclcpp::NodeOptions & options)
+    explicit CubicDoggoLifecycleManager(const rclcpp::NodeOptions & options)
     : rclcpp_lifecycle::LifecycleNode("cubic_doggo_lifecycle", options) {
         RCLCPP_INFO(get_logger(), "constructor(): %s", current_lifecycle_state_.c_str());
 
@@ -56,20 +56,20 @@ public:
         RCLCPP_INFO(get_logger(), "on_configure(): %s", current_lifecycle_state_.c_str());
 
         if (!exec_action_client_->wait_for_action_server(std::chrono::seconds(5))) {
-            RCLCPP_ERROR(get_logger(), "on_configure): ExecuteTrajectory action server not available");
+            RCLCPP_ERROR(get_logger(), "on_configure(): ExecuteTrajectory action server not available");
             return CallbackReturn::FAILURE;
         }
 
         for (std::size_t legIdx = 0; legIdx < legN; legIdx++) {
             leg_interface_[legIdx] = std::make_shared<MoveGroupInterface>(moveit_node_, planning_group_[legIdx]);
             while (rclcpp::ok() && !leg_interface_[legIdx]->startStateMonitor(1.0)) {
-                RCLCPP_INFO(get_logger(), "on_configure): waiting for valid MoveGroupInterface state %s",
+                RCLCPP_INFO(get_logger(), "on_configure(): waiting for valid MoveGroupInterface state %s",
                             planning_group_[legIdx].c_str());
             }
         }
         all_legs_interface_ = std::make_shared<MoveGroupInterface>(moveit_node_, all_legs_planning_group_);
         while (rclcpp::ok() && !all_legs_interface_->startStateMonitor(1.0)) {
-            RCLCPP_INFO(get_logger(), "on_configure): waiting for valid MoveGroupInterface state %s", 
+            RCLCPP_INFO(get_logger(), "on_configure(): waiting for valid MoveGroupInterface state %s", 
                         all_legs_planning_group_.c_str());
         }
         for (std::size_t legIdx = 0; legIdx < legN; legIdx++) {
@@ -89,10 +89,10 @@ public:
  
         state_service_ = this->create_service<std_srvs::srv::Trigger>(
             "get_robot_state",
-            std::bind(&MyRobotLifecycleManager::handleGetState_, this, _1, _2)); 
+            std::bind(&CubicDoggoLifecycleManager::handleGetState_, this, _1, _2)); 
         walk_service_ = this->create_service<std_srvs::srv::SetBool>(
             "leg_walk_toggle", 
-            std::bind(&MyRobotLifecycleManager::handleWalkRequest_, this, _1, _2), 
+            std::bind(&CubicDoggoLifecycleManager::handleWalkRequest_, this, _1, _2), 
             rclcpp::ServicesQoS(), 
             callback_group_);
 
@@ -112,15 +112,15 @@ public:
         auto sub_options = rclcpp::SubscriptionOptions();
         sub_options.callback_group = callback_group_;
         leg_named_subscriber_ = create_subscription<ros_string>  ("/leg_set_named", 10,
-            std::bind(&MyRobotLifecycleManager::legNamedCallback_, this, _1), sub_options);
+            std::bind(&CubicDoggoLifecycleManager::legNamedCallback_, this, _1), sub_options);
         leg_joint_subscriber_ = create_subscription<ros_array>   ("/leg_set_joint", 10,
-            std::bind(&MyRobotLifecycleManager::legJointCallback_, this, _1), sub_options);
+            std::bind(&CubicDoggoLifecycleManager::legJointCallback_, this, _1), sub_options);
         leg_pose_subscriber_  = create_subscription<custom_array>("/leg_set_pose",  10,
-            std::bind(&MyRobotLifecycleManager::legPoseCallback_,  this, _1), sub_options);
+            std::bind(&CubicDoggoLifecycleManager::legPoseCallback_,  this, _1), sub_options);
 
         keep_running_thread_ = true;
         is_walking_          = false; 
-        walking_thread_      = std::thread(&MyRobotLifecycleManager::walkingLoop_, this);
+        walking_thread_      = std::thread(&CubicDoggoLifecycleManager::walkingLoop_, this);
 
         current_lifecycle_state_ = "state_stationary";
         RCLCPP_INFO(get_logger(), "on_activation(): %s", current_lifecycle_state_.c_str());
@@ -271,9 +271,7 @@ private:
     void walkingLoop_() {
         bool   initialized = false;
         double maxVelScale = 1.0;
-        double maxAccScale = 0.8;
-        double stride = 0.04;
-        double lift   = 0.03; 
+        double maxAccScale = 1.0;
         
         auto all_legs_robot_model = all_legs_interface_->getRobotModel();
         std::array<double, legN> home_x, home_y, home_z;
@@ -302,6 +300,8 @@ private:
             }
         
             // simple 2-phase gait
+            double stride = 0.0;
+            double lift   = 0.03;
             std::vector<moveit::core::RobotStatePtr> gait_waypoints;
             for (int gaitPhase = 0; gaitPhase < 2; gaitPhase++) { 
                 moveit::core::RobotStatePtr phase_state = 
@@ -491,7 +491,7 @@ int main(int argc, char **argv) {
     rclcpp::NodeOptions node_options;
     node_options.automatically_declare_parameters_from_overrides(true);
 
-    auto lifecycle_manager_node = std::make_shared<MyRobotLifecycleManager>(node_options);
+    auto lifecycle_manager_node = std::make_shared<CubicDoggoLifecycleManager>(node_options);
     rclcpp::executors::MultiThreadedExecutor executor;
     executor.add_node(lifecycle_manager_node->get_node_base_interface());
     executor.add_node(lifecycle_manager_node->get_moveit_node());
