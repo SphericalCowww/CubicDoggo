@@ -58,16 +58,16 @@
         <joint name="servo3_calfFeet_BR" value="3.34"/>
     </group_state>
     <group_state name="stand" group="all_legs">
-        <joint name="servo1_servo1_padding_FL" value="3.04"/>
+        <joint name="servo1_servo1_padding_FL" value="3.14"/>
         <joint name="servo2_servo2_padding_FL" value="2.34"/>
         <joint name="servo3_calfFeet_FL" value="2.74"/>
-        <joint name="servo1_servo1_padding_FR" value="3.24"/>
+        <joint name="servo1_servo1_padding_FR" value="3.14"/>
         <joint name="servo2_servo2_padding_FR" value="3.94"/>
         <joint name="servo3_calfFeet_FR" value="3.54"/>
-        <joint name="servo1_servo1_padding_BL" value="3.04"/>
+        <joint name="servo1_servo1_padding_BL" value="3.14"/>
         <joint name="servo2_servo2_padding_BL" value="2.34"/>
         <joint name="servo3_calfFeet_BL" value="2.74"/>
-        <joint name="servo1_servo1_padding_BR" value="3.24"/>
+        <joint name="servo1_servo1_padding_BR" value="3.14"/>
         <joint name="servo2_servo2_padding_BR" value="3.94"/>
         <joint name="servo3_calfFeet_BR" value="3.54"/>
     </group_state>
