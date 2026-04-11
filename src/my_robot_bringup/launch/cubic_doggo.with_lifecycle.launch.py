@@ -87,7 +87,7 @@ def generate_launch_description():
         all_legs_controller_spawner,
         moveit_launcher,
         lifecycle_node,
-        rviz_node,
+#        rviz_node,
     ])
 
 ######################################################################################################################

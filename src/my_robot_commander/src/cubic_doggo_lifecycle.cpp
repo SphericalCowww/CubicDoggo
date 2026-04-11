@@ -167,6 +167,12 @@ public:
     CallbackReturn on_shutdown(const rclcpp_lifecycle::State &) override {
         RCLCPP_INFO(get_logger(), "on_shutdown(): %s", current_lifecycle_state_.c_str());
         setDefaultVelAccScaler_(DEFAULT_VEL_SCALE, DEFAULT_ACC_SCALE);
+
+        keep_running_thread_ = false;
+        is_walking_          = false;
+        if (walking_thread_.joinable()) {
+            walking_thread_.join();
+        }
         
         for (std::size_t legIdx = 0; legIdx < legN; legIdx++) {
             leg_interface_[legIdx]->stop();
