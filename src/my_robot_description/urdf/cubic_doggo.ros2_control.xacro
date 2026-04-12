@@ -2,8 +2,8 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
     <ros2_control name="cubic_doggo_controller" type="system">
         <hardware>
-            <!--plugin>mock_components/GenericSystem</plugin-->
-            <plugin>cubic_doggo_namespace/HardwareInterfaceU2D2_cubic_doggo</plugin>
+            <plugin>mock_components/GenericSystem</plugin>
+            <!--plugin>cubic_doggo_namespace/HardwareInterfaceU2D2_cubic_doggo</plugin-->
             <param name="servo1_channel_FL">11</param>
             <param name="servo2_channel_FL">12</param>
             <param name="servo3_channel_FL">13</param>

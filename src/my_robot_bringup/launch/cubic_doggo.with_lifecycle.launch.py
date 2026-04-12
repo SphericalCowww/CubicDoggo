@@ -10,16 +10,16 @@ import os
 
 ######################################################################################################################
 def generate_launch_description():
-    robot_description_path   = get_package_share_path('my_robot_description')
-    robot_bringup_path       = get_package_share_path('my_robot_bringup')
-    robot_moveit_config_path = get_package_share_path('cubic_doggo_moveit_config')   
+    robot_description_path   = get_package_share_path("my_robot_description")
+    robot_bringup_path       = get_package_share_path("my_robot_bringup")
+    robot_moveit_config_path = get_package_share_path("cubic_doggo_moveit_config")   
  
-    urdf_path          = os.path.join(robot_description_path,   'urdf',   'cubic_doggo.urdf.xacro')
-    robot_controllers  = os.path.join(robot_bringup_path,       'config', 'cubic_doggo_controllers.yaml')
-    moveit_config_path = os.path.join(robot_moveit_config_path, 'launch', 'move_group.launch.py')
-    rviz_config_path   = os.path.join(robot_description_path,   'rviz',   'cubic_doggo.urdf_config.rviz')
+    urdf_path          = os.path.join(robot_description_path,   "urdf",   "cubic_doggo.urdf.xacro")
+    robot_controllers  = os.path.join(robot_bringup_path,       "config", "cubic_doggo_controllers.yaml")
+    moveit_config_path = os.path.join(robot_moveit_config_path, "launch", "move_group.launch.py")
+    rviz_config_path   = os.path.join(robot_description_path,   "rviz",   "cubic_doggo.urdf_config.rviz")
 
-    robot_description = ParameterValue(Command(['xacro ', urdf_path]), value_type=str)
+    robot_description = ParameterValue(Command(["xacro ", urdf_path]), value_type=str)
     robot_state_publisher_node = Node(
         package="robot_state_publisher",
         executable="robot_state_publisher",
@@ -77,17 +77,34 @@ def generate_launch_description():
             moveit_config.robot_description_kinematics,
         ],
     )
+
+    joy_driver_node = Node(
+        package="joy",
+        executable="joy_node",
+        parameters=[{
+            "deadzone": 0.05,
+            "autorepeat_rate": 20.0,
+            # "device_id": 0            # force a specific controller if needed
+        }]
+    )
+    joy_controller_node = Node(
+        package="my_robot_controller",
+        executable="cubic_doggo_joy_control",
+        remappings=[("joy", "/joy")] 
+    )
     
     return LaunchDescription([
-        SetParameter(name='jump_threshold', value=0.15),
-        SetParameter(name='use_sim_time', value=False),
+        SetParameter(name="jump_threshold", value=0.15),
+        SetParameter(name="use_sim_time", value=False),
         robot_state_publisher_node,
         control_node,
         joint_state_broadcaster_spawner,
         all_legs_controller_spawner,
         moveit_launcher,
         lifecycle_node,
-#        rviz_node,
+        rviz_node,
+        joy_driver_node,
+        joy_controller_node,
     ])
 
 ######################################################################################################################
