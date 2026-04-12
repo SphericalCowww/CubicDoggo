@@ -6,6 +6,26 @@ Derivation of the <a href="https://github.com/SphericalCowww/ROS_leggedRobot_tes
 
 Goal 1: Resolving the walking gait. The current walking gait (<a href="https://www.reddit.com/r/robotics/comments/1rouerc/first_time_building_a_hobbyist_robot_from_scratch/">link</a>) is already showing the problem of not being able to lift the feet in action. Perhaps this can be resolved by gait optimization, but it can also be limited intrinsic motor speed, maximum current from the batteries, the feet being too heavy, or just not having enough friction on the feet.
 
+## Basic Commands
+
+Start the robot (skip launching rviz_node, joy_driver_node, or joy_controller_node if needed):
+
+    ros2 launch my_robot_bringup cubic_doggo.with_lifecycle.launch.py
+
+Debugging the ``joy_controller_node``:
+
+    ls /dev/input/js*
+    # output: /dev/input/js0
+    # otherwise do: sudo jstest /dev/input/js0
+    
+    ros2 run joy joy_node
+    #on another device
+    ros2 run my_robot_controller cubic_doggo_joy_control
+    # on yet another device
+    ros2 node info /cubic_doggo_joy_control    
+    ros2 topic info /joy --verbose
+    ros2 topic echo /joy
+
 ## Training with Isaac Sim
 
 ### Hardware
