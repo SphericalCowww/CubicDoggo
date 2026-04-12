@@ -17,6 +17,10 @@ Debugging the ``joy_controller_node``:
     ls /dev/input/js*
     # output: /dev/input/js0
     # otherwise do: sudo jstest /dev/input/js0
+    ros2 run joy joy_enumerate_devices
+    # if no device found
+    sudo usermod -aG input $USER
+    sudo reboot
     
     ros2 run joy joy_node
     #on another device
