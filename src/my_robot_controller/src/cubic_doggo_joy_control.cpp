@@ -14,26 +14,51 @@ public:
             std::bind(&CubicDoggoJoyControl::joy_callback, this, std::placeholders::_1)
         );
         command_pub_ = this->create_publisher<example_interfaces::msg::String>("/leg_set_named", 10);
-        RCLCPP_INFO(this->get_logger(), "Jazzy Joy Node Started. Listening on /joy...");
+        RCLCPP_INFO(this->get_logger(), "CubicDoggoJoyControl:constructor()"
+                                        "controller node started, listening on /joy...");
     }
 
 private:
     void joy_callback(const sensor_msgs::msg::Joy::SharedPtr msg) {
-        RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 500, "Jazzy Joy data flowing!");
+        if (prev_buttons_.size() != msg->buttons.size()) {
+            prev_buttons_.resize(msg->buttons.size(), 0);
+        }
         if (msg->buttons.size() > 3) {
-            if (msg->buttons[3] == 1 && prev_y_state_ == 0) {
-                auto out_msg = example_interfaces::msg::String();
+            if (msg->buttons[3] == 1 && prev_buttons_[3] == 0) {
+                example_interfaces::msg::String out_msg;
                 out_msg.data = "stand";
                 command_pub_->publish(out_msg);
-                RCLCPP_INFO(this->get_logger(), "Xbox 'Y' -> STAND Command Sent");
+                RCLCPP_INFO(this->get_logger(), "CubicDoggoJoyControl:joy_callback():"
+                                                "joy button 'Y' pressed, 'stand' command sent");
             }
-            prev_y_state_ = msg->buttons[3];
+            if (msg->buttons[2] == 1 && prev_buttons_[2] == 0) {
+                example_interfaces::msg::String out_msg;
+                out_msg.data = "sit";
+                command_pub_->publish(out_msg);
+                RCLCPP_INFO(this->get_logger(), "CubicDoggoJoyControl:joy_callback():"
+                                                "joy button 'X' pressed, 'sit' command sent");
+            }
+            if (msg->buttons[1] == 1 && prev_buttons_[1] == 0) {
+                example_interfaces::msg::String out_msg;
+                out_msg.data = "bow";
+                command_pub_->publish(out_msg);
+                RCLCPP_INFO(this->get_logger(), "CubicDoggoJoyControl:joy_callback():"
+                                                "joy button 'B' pressed, 'bow' command sent");
+            }
+            if (msg->buttons[0] == 1 && prev_buttons_[0] == 0) {
+                example_interfaces::msg::String out_msg;
+                out_msg.data = "rest";
+                command_pub_->publish(out_msg);
+                RCLCPP_INFO(this->get_logger(), "CubicDoggoJoyControl:joy_callback():"
+                                                "joy button 'A' pressed, 'rest' command sent");
+            }
         }
+        prev_buttons_ = msg->buttons;
     }
 
     rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr joy_subscriber_;
     rclcpp::Publisher<example_interfaces::msg::String>::SharedPtr command_pub_;
-    int prev_y_state_ = 0;
+    std::vector<int> prev_buttons_;
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

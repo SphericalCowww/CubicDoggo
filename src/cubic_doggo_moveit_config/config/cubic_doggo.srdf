@@ -86,6 +86,20 @@
         <joint name="servo2_servo2_padding_BR" value="3.74"/>
         <joint name="servo3_calfFeet_BR" value="2.64"/>
     </group_state>
+    <group_state name="bow" group="all_legs">
+        <joint name="servo1_servo1_padding_FL" value="3.24"/>
+        <joint name="servo2_servo2_padding_FL" value="2.54"/>
+        <joint name="servo3_calfFeet_FL" value="3.74"/>
+        <joint name="servo1_servo1_padding_FR" value="3.04"/>
+        <joint name="servo2_servo2_padding_FR" value="3.74"/>
+        <joint name="servo3_calfFeet_FR" value="2.64"/>
+        <joint name="servo1_servo1_padding_BL" value="3.04"/>
+        <joint name="servo2_servo2_padding_BL" value="2.34"/>
+        <joint name="servo3_calfFeet_BL" value="2.74"/>
+        <joint name="servo1_servo1_padding_BR" value="3.24"/>
+        <joint name="servo2_servo2_padding_BR" value="3.94"/>
+        <joint name="servo3_calfFeet_BR" value="3.54"/>
+    </group_state>
     <!--VIRTUAL JOINT: Purpose: this element defines a virtual joint between a robot link and an external frame of reference (considered fixed with respect to the robot)-->
     <!--virtual_joint name="virtual_joint" type="fixed" parent_frame="world" child_link="world"/-->
     <!--DISABLE COLLISIONS: By default it is assumed that any link of the robot could potentially come into collision with any other link in the robot. This tag disables collision checking between a specified pair of links. -->
