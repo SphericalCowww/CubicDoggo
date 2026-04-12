@@ -11,6 +11,14 @@ Goal 1: Resolving the walking gait. The current walking gait (<a href="https://w
 Start the robot (skip launching rviz_node, joy_driver_node, or joy_controller_node if needed):
 
     ros2 launch my_robot_bringup cubic_doggo.with_lifecycle.launch.py
+    # on another terminal
+    ros2 topic pub -1 /leg_set_named example_interfaces/msg/String "{data: "rest"}"
+    ros2 topic pub -1 /leg_set_named example_interfaces/msg/String "{data: "stand"}"
+    ros2 topic pub -1 /leg_set_named example_interfaces/msg/String "{data: "sit"}"
+    ros2 topic pub -1 /leg_set_named example_interfaces/msg/String "{data: "bow"}"
+    ros2 topic pub -1 /leg_set_joint example_interfaces/msg/Float64MultiArray "{data: [0, 3.14, 3.14, 3.54]}"
+    ros2 topic pub -1 /leg_set_pose my_robot_interface/msg/CubicDoggoLegPoseTarget "{leg_index: 0, x: -0.092, y: 0.053, z: 0.135}" 
+    ros2 service call /leg_walk_toggle std_srvs/srv/SetBool "{data: true}"
 
 Debugging the ``joy_controller_node``:
 
@@ -23,9 +31,9 @@ Debugging the ``joy_controller_node``:
     sudo reboot
     
     ros2 run joy joy_node
-    #on another device
+    # on another terminal
     ros2 run my_robot_controller cubic_doggo_joy_control
-    # on yet another device
+    # on yet another terminal
     ros2 node info /cubic_doggo_joy_control    
     ros2 topic info /joy --verbose
     ros2 topic echo /joy
