@@ -39,15 +39,20 @@ private:
                 send_pose_("rest");
             }
         }
-        if (msg->buttons.size() > 7) {
-            if (msg->buttons[7] == 1 && prev_buttons_[7] == 0) {
+        prev_buttons_ = msg->buttons;
+
+        if (prev_axes_.size() != msg->axes.size()) {
+            prev_axes_.resize(msg->axes.size(), 0);
+        }
+        if (msg->axes.size() > 7) {
+            if (msg->axes[7] > 0.5 && prev_axes_[7] <= 0.5) {
                 call_walk_(true);
             }
-            if (msg->buttons[6] == 1 && prev_buttons_[6] == 0) {
+            if (msg->axes[7] < -0.5 && prev_axes_[7] >= -0.5) {
                 call_walk_(false);
             }
         }
-        prev_buttons_ = msg->buttons;
+        prev_axes_ = msg->axes;
     }
     void send_pose_(std::string pose_name) {
         example_interfaces::msg::String out_msg;
@@ -57,7 +62,8 @@ private:
     }
     void call_walk_(bool walk_state) {
         if (!walk_client_->wait_for_service(std::chrono::milliseconds(500))) {
-            RCLCPP_WARN(this->get_logger(), "Service /leg_walk_toggle not available!");
+            RCLCPP_WARN(this->get_logger(), "CubicDoggoJoyControl:call_walk_(): "
+                                            "service /leg_walk_toggle not available!");
             return;
         }
         auto request = std::make_shared<std_srvs::srv::SetBool::Request>();
@@ -71,7 +77,8 @@ private:
     rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr joy_subscriber_;
     rclcpp::Publisher<example_interfaces::msg::String>::SharedPtr command_pub_;
     rclcpp::Client<std_srvs::srv::SetBool>::SharedPtr walk_client_;
-    std::vector<int> prev_buttons_;
+    std::vector<int>   prev_buttons_;
+    std::vector<float> prev_axes_;
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
