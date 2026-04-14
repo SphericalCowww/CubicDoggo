@@ -215,6 +215,7 @@ private:
     }
     ///////////
     void legNamedTarget_(const std::string &name) {
+        is_walking_ = false;
         if (name == "stand") {
             all_legs_interface_->setNamedTarget("stand_mid");
             planAndExecute_();
@@ -315,7 +316,7 @@ private:
             }
         
             // simple 2-phase gait
-            double stride = 0.0;
+            double stride = 0.03;
             double lift   = 0.03;
             std::vector<moveit::core::RobotStatePtr> gait_waypoints;
             for (int gaitPhase = 0; gaitPhase < 2; gaitPhase++) { 
