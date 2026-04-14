@@ -37,6 +37,29 @@ Debugging the ``joy_controller_node``:
     ros2 node info /cubic_doggo_joy_control    
     ros2 topic info /joy --verbose
     ros2 topic echo /joy
+    
+### launch at the start of turning on rasp pi
+
+    chmod +x /home/cubicdoggo/Documents/ROS_leggedRobot_testBed/start_robot.sh
+    sudo vim /etc/systemd/system/robot_startup.service
+    # filling the following:
+    ## [Unit]
+    ## Description=Cubic Doggo Robot Bringup
+    ## After=network.target
+    ## [Service]
+    ## Type=simple
+    ## User=cubicdoggo
+    ## ExecStart=/home/cubicdoggo/Documents/ROS_leggedRobot_testBed/start_robot.sh
+    ## Restart=on-failure
+    ## RestartSec=5
+    ## [Install]
+    ## WantedBy=multi-user.target
+    sudo systemctl daemon-reload                      # reload whenever there is a change
+    sudo systemctl enable robot_startup.service       # now will start at reboot
+    # sudo systemctl start robot_startup.service        # start right now too
+    # sudo systemctl stop robot_startup.service         # stop right now
+    # sudo systemctl disable robot_startup.service      # disable at reboot
+
 
 ## Training with Isaac Sim
 
