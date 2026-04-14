@@ -53,7 +53,7 @@ private:
         example_interfaces::msg::String out_msg;
         out_msg.data = pose_name;
         command_pub_->publish(out_msg);
-        RCLCPP_INFO(this->get_logger(), "CubicDoggoJoyControl:send_pose_(): '"+pose_name+"' command sent");
+        RCLCPP_INFO(this->get_logger(), "CubicDoggoJoyControl:send_pose_(): '%s' command sent", pose_name.c_str());
     }
     void call_walk_(bool walk_state) {
         if (!walk_client_->wait_for_service(std::chrono::milliseconds(500))) {
@@ -64,7 +64,8 @@ private:
         request->data = walk_state;
         auto result = walk_client_->async_send_request(request);
         std::string walk_state_str = walk_state ? "true" : "false";
-        RCLCPP_INFO(this->get_logger(), "CubicDoggoJoyControl:call_walk_(): walk state '"+walk_state_str+"' sent");
+        RCLCPP_INFO(this->get_logger(), "CubicDoggoJoyControl:call_walk_(): walk state '%s' sent", 
+                                        walk_state_str.c_str());
     }
 
     rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr joy_subscriber_;

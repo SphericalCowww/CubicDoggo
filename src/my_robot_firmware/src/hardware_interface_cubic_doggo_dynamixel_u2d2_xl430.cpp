@@ -91,8 +91,8 @@ namespace cubic_doggo_namespace {
                                           "position mode for ch %d, model_number : %d\n", 
                                           servo_channels_[servo_idx], model_number_);
             }
-            dxl_wb_.itemWrite(servo_channels_[servo_idx], "Current_Limit",   400, &log_);   // torque: current limit
-            dxl_wb_.itemWrite(servo_channels_[servo_idx], "Position_P_Gain", 400, &log_);   // PID: lower P gain
+            dxl_wb_.itemWrite(servo_channels_[servo_idx], "Current_Limit",   800, &log_);   // torque: current limit
+            dxl_wb_.itemWrite(servo_channels_[servo_idx], "Position_P_Gain", 600, &log_);   // PID: lower P gain
             dxl_wb_.itemWrite(servo_channels_[servo_idx], "Position_D_Gain", 100, &log_);   // PID: adding damping
         }
         dxl_wb_.addSyncReadHandler(servo_channels_[0], "Present_Position", &log_);
