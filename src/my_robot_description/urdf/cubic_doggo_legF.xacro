@@ -16,17 +16,6 @@
         <xacro:property name="base_plate"        value="base_plate_F"/>
         <xacro:property name="servo1_holder_xyz" value=" 0.052 0.018 0.004"/>
     </xacro:if>
-    <xacro:if value="${prefix == 'BL'}">
-        <xacro:property name="rflc"              value=" 1"/>
-        <xacro:property name="base_plate"        value='base_plate_B'/>
-        <xacro:property name="servo1_holder_xyz" value="-0.052 0.018 0.004"/>
-    </xacro:if>
-    <xacro:if value="${prefix == 'BR'}">
-        <xacro:property name="rflc"              value="-1"/>
-        <xacro:property name="base_plate"        value='base_plate_B'/>
-        <xacro:property name="servo1_holder_xyz" value=" 0.052 0.018 0.004"/>
-    </xacro:if> 
-
     <!-- ============================================================================================================================== -->
     <link name="servo1_holder_${prefix}">
         <visual>
@@ -93,7 +82,7 @@
         <child  link="servo1_padding_${prefix}"/>
         <origin xyz="0 ${-servo_z/2-0.002} ${0.01+0.0025/2}" rpy="0 0 0"/>
         <axis xyz="0 -1 0"/>
-        <limit effort="1000.0" velocity="20.0" lower="${urdf_pi - urdf_pi/3}" upper="${urdf_pi + urdf_pi/3}"/>
+        <limit effort="1000.0" velocity="50.0" lower="${urdf_pi - urdf_pi/3}" upper="${urdf_pi + urdf_pi/3}"/>
         <dynamics friction="0.05" damping="0.1"/>
     </joint>
 
@@ -134,7 +123,8 @@
             </geometry>
             <origin xyz="0 ${-servo_y/2} 0" rpy="0 ${rflc*urdf_pi/2} 0"/>
         </collision>
-        <xacro:box_inertia m="0.0572" x="${servo_x}" y="${servo_y}" z="${servo_z}" o_xyz="0 ${-servo_y/2} 0" o_rpy="0 ${rflc*urdf_pi/2} 0"/>
+        <xacro:box_inertia m="0.0572" x="${servo_x}" y="${servo_y}" z="${servo_z}" 
+                           o_xyz="0 ${-servo_y/2} 0" o_rpy="0 ${rflc*urdf_pi/2} 0"/>
     </link> 
     <joint name="servo2_holder_servo2_${prefix}" type="fixed">
         <parent link="servo2_holder_${prefix}"/>
@@ -163,7 +153,7 @@
         <child  link="servo2_padding_${prefix}"/>
         <origin xyz="${rflc*(servo_z/2+0.002)} -0.03525 0" rpy="0 0 0"/>
         <axis xyz="${rflc} 0 0"/>
-        <limit effort="1000.0" velocity="20.0" lower="${urdf_pi - 2*urdf_pi/6 - rflc*urdf_pi/6}" 
+        <limit effort="1000.0" velocity="50.0" lower="${urdf_pi - 2*urdf_pi/6 - rflc*urdf_pi/6}" 
                                                upper="${urdf_pi + 2*urdf_pi/6 - rflc*urdf_pi/6}"/>
         <dynamics friction="0.05" damping="0.1"/>
     </joint>
@@ -204,7 +194,7 @@
             <geometry>
                 <box size="0.040 0.032 0.006"/>
             </geometry>
-            <origin xyz="${rflc*0.003} -0.0475 0" rpy="${-urdf_pi/2} ${urdf_pi/2-rflc*urdf_pi/2} ${-rflc*urdf_pi/2}"/>
+            <origin xyz="${rflc*0.003} -0.06 0" rpy="${-urdf_pi/2} ${urdf_pi/2-rflc*urdf_pi/2} ${-rflc*urdf_pi/2}"/>
         </collision>
         <xacro:box_inertia m="0.0113" x="0.040" y="0.032" z="0.006" 
                            o_xyz="${rflc*0.003} -0.0475 0" o_rpy="${-urdf_pi/2} ${urdf_pi/2-rflc*urdf_pi/2} ${-rflc*urdf_pi/2}"/>
@@ -260,7 +250,7 @@
         <child  link="calfFeet_${prefix}"/>
         <origin xyz="${rflc*(-servo_z/2-0.002-0.0025)} ${-0.086+0.004} 0" rpy="0 0 0"/>
         <axis xyz="${-rflc} 0 0"/>
-        <limit effort="1000.0" velocity="20.0" lower="${5*urdf_pi/8}" upper="${11*urdf_pi/8}"/>
+        <limit effort="1000.0" velocity="50.0" lower="${5*urdf_pi/8}" upper="${11*urdf_pi/8}"/>
         <dynamics friction="0.0128" damping="0.1"/>
     </joint>
 
@@ -284,10 +274,10 @@
     <joint name="servo3_calfJoint_${prefix}" type="revolute">
         <parent link="servo3_${prefix}"/>
         <child  link="calfJoint_${prefix}"/>
-        <origin xyz="${rflc*(-servo_z/2-0.002-0.0025)} ${-0.01-0.0025/2} 0" rpy="0 0 0"/>
+        <origin xyz="${rflc*(-servo_z/2-0.002-0.0025)} ${-0.01-0.0025/2-0.001} 0" rpy="0 0 0"/>
         <axis xyz="${-rflc} 0 0"/>
         <mimic joint="servo3_calfFeet_${prefix}" multiplier="1.0" offset="0.0"/>
-        <limit effort="1000.0" velocity="20.0" lower="${5*urdf_pi/8}" upper="${11*urdf_pi/8}"/>
+        <limit effort="1000.0" velocity="50.0" lower="${5*urdf_pi/8}" upper="${11*urdf_pi/8}"/>
         <dynamics friction="0.0212" damping="0.1"/>
     </joint>
 
