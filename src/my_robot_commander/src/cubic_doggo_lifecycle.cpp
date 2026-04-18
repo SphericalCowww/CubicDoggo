@@ -267,6 +267,117 @@ private:
                     legIdx, endEffector_x_[legIdx], endEffector_y_[legIdx], endEffector_z_[legIdx]);    
     }
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    std::vector<moveit::core::RobotStatePtr> linearWalkGait_(double stride, double lift) {
+        std::vector<moveit::core::RobotStatePtr> gait_waypoints;
+        for (int gaitPhase = 0; gaitPhase < 2; gaitPhase++) { 
+            moveit::core::RobotStatePtr phase_state = 
+                std::make_shared<moveit::core::RobotState>(*all_legs_current_robot_state_);
+            for (std::size_t legIdx = 0; legIdx < legN; legIdx++) {
+                double target_x = home_x[legIdx];
+                double target_y = home_y[legIdx];
+                double target_z = home_z[legIdx];
+
+                bool is_group_a = (legIdx == 0 || legIdx == 3);
+                bool is_group_b = (legIdx == 1 || legIdx == 2);
+                if (gaitPhase == 0) {
+                    if (is_group_a == true) { 
+                        target_y += stride; 
+                        target_z -= lift; 
+                    } 
+                    if (is_group_b == true) { 
+                        target_y -= stride; 
+                    }
+                } else if (gaitPhase == 1) {
+                    if (is_group_a == true) { 
+                        target_y -= stride;
+                    } 
+                    if (is_group_b == true) { 
+                        target_y += stride;
+                        target_z -= lift; 
+                    }
+                }
+                geometry_msgs::msg::Pose leg_pose = endEffector_pose_[legIdx].pose;
+                leg_pose.position.x = target_x;
+                leg_pose.position.y = target_y;
+                leg_pose.position.z = target_z;
+
+                auto leg_model_group = all_legs_robot_model->getJointModelGroup(planning_group_[legIdx]);
+                success_ = phase_state->setFromIK(leg_model_group, leg_pose, endEffector_link_[legIdx]);
+                if (success_ == false) {
+                    RCLCPP_ERROR(get_logger(), "CubicDoggoLifecycleManager:linearWalkGait(): "
+                                               "IK failed for leg %zu in phase %d", legIdx, gaitPhase);
+                    is_walking_ = false;
+                    continue;
+                }
+            }
+            if (is_walking_ == false) {
+                break;
+            }
+            gait_waypoints.push_back(phase_state);
+        }
+        return gait_waypoints;
+    }
+    std::vector<moveit::core::RobotStatePtr> triangleWalkGait_(double stride, double lift) {
+        std::vector<moveit::core::RobotStatePtr> gait_waypoints;
+        for (int trajIdx = 0; trajIdx < 4; trajIdx++) { 
+            moveit::core::RobotStatePtr phase_state = 
+                std::make_shared<moveit::core::RobotState>(*all_legs_current_robot_state_);
+            for (std::size_t legIdx = 0; legIdx < legN; legIdx++) {
+                double target_x = home_x[legIdx];
+                double target_y = home_y[legIdx];
+                double target_z = home_z[legIdx];
+
+                bool is_group_a = (legIdx == 0 || legIdx == 3);
+                bool is_group_b = (legIdx == 1 || legIdx == 2);
+                if (trajIdx == 0) {
+                    if (is_group_a == true) { 
+                        target_z -= lift; 
+                    }
+                    if (is_group_b  == true) { 
+                    }
+                } else if (trajIdx == 1) {
+                    if (is_group_a == true) { 
+                        target_y += stride; 
+                    } 
+                    if (is_group_b == true) { 
+                        target_y -= stride; 
+                    }
+                } else if (trajIdx == 2) {
+                    if (is_group_a == true) {
+                    }
+                    if (is_group_b == true) { 
+                        target_z -= lift;
+                    }
+                } else if (trajIdx == 3) {
+                    if (is_group_a == true) { 
+                        target_y -= stride; 
+                    } 
+                    if (is_group_b == true) { 
+                        target_y += stride; 
+                    }
+                }
+                geometry_msgs::msg::Pose leg_pose = endEffector_pose_[legIdx].pose;
+                leg_pose.position.x = target_x;
+                leg_pose.position.y = target_y;
+                leg_pose.position.z = target_z;
+
+                auto leg_model_group = all_legs_robot_model->getJointModelGroup(planning_group_[legIdx]);
+                success_ = phase_state->setFromIK(leg_model_group, leg_pose, endEffector_link_[legIdx]);
+                if (success_ == false) {
+                    RCLCPP_ERROR(get_logger(), "CubicDoggoLifecycleManager:triangleWalkGait(): "
+                                               "IK failed for leg %zu in phase %d", legIdx, trajIdx);
+                    is_walking_ = false;
+                    continue;
+                }
+            }
+            if (is_walking_ == false) {
+                break;
+            }
+            gait_waypoints.push_back(phase_state);
+        }
+        return gait_waypoints;
+    }
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     void handleGetState_(const std::shared_ptr<std_srvs::srv::Trigger::Request> /*request*/,
                          std::shared_ptr<std_srvs::srv::Trigger::Response> response) {
         for (std::size_t legIdx = 0; legIdx < legN; ++legIdx) {
@@ -285,7 +396,6 @@ private:
         response->message = is_walking_ ? "walking started" : "walking stopped";
     }
     void walkingLoop_() {
-        bool   initialized = false;
         double maxVelScale = 1.0;
         double maxAccScale = 1.0;
         
@@ -294,14 +404,13 @@ private:
         bool home_captured = false;
         while (keep_running_thread_ && rclcpp::ok()) {
             if (is_walking_ == false) {
-                initialized = false;
+                walking_initialized_ = false;
                 home_captured = false;
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
                 continue;
-            } else if (initialized == false) {
+            } else if (walking_initialized_ == false) {
                 legNamedTarget_("stand");
                 setDefaultVelAccScaler_(maxVelScale, maxAccScale);
-                initialized = true;
             }
 
             loadCurrentRobotState_();
@@ -314,60 +423,12 @@ private:
                 home_captured = true;
                 RCLCPP_INFO(get_logger(), "CubicDoggoLifecycleManager:walkingLoop_(): home positions captured.");
             }
-        
-            // simple 2-phase gait
-            double stride = 0.03;
-            double lift   = 0.03;
-            std::vector<moveit::core::RobotStatePtr> gait_waypoints;
-            for (int gaitPhase = 0; gaitPhase < 2; gaitPhase++) { 
-                moveit::core::RobotStatePtr phase_state = 
-                    std::make_shared<moveit::core::RobotState>(*all_legs_current_robot_state_);
-                for (std::size_t legIdx = 0; legIdx < legN; legIdx++) {
-                    double target_x = home_x[legIdx];
-                    double target_y = home_y[legIdx];
-                    double target_z = home_z[legIdx];
-
-                    bool is_group_a = (legIdx == 0 || legIdx == 3);
-                    bool is_group_b = (legIdx == 1 || legIdx == 2);
-
-                    if (gaitPhase == 0) {
-                        if (is_group_a  == true) { 
-                            target_y += stride; 
-                            target_z -= lift; 
-                        } 
-                        if (is_group_b  == true) { 
-                            target_y -= stride; 
-                        }
-                    } else if (gaitPhase == 1) {
-                        if (is_group_b == true) { 
-                            target_y += stride; 
-                            target_z -= lift; 
-                        } 
-                        if (is_group_a == true) { 
-                            target_y -= stride; 
-                        }
-                    }
-                    
-                    geometry_msgs::msg::Pose leg_pose = endEffector_pose_[legIdx].pose;
-                    leg_pose.position.x = target_x;
-                    leg_pose.position.y = target_y;
-                    leg_pose.position.z = target_z;
-
-                    auto leg_model_group = all_legs_robot_model->getJointModelGroup(planning_group_[legIdx]);
-                    success_ = phase_state->setFromIK(leg_model_group, leg_pose, endEffector_link_[legIdx]);
-                    if (success_ == false) {
-                        RCLCPP_ERROR(get_logger(), "CubicDoggoLifecycleManager:walkingLoop_(): "
-                                                   "IK failed for leg %zu in phase %d", legIdx, gaitPhase);
-                        is_walking_ = false;
-                        continue;
-                    }
-                }
-                if (is_walking_ == false) {
-                    break;
-                }
-                gait_waypoints.push_back(phase_state);
-            }
+            
             ////////////////
+            //std::vector<moveit::core::RobotStatePtr> gait_waypoints = linearWalkGait_(0.03, 0.03);
+            std::vector<moveit::core::RobotStatePtr> gait_waypoints = triangleWalkGait_(0.03, 0.015);
+            ////////////////
+            
             auto robo_traj = std::make_shared<robot_trajectory::RobotTrajectory>(all_legs_robot_model, 
                                                                                  all_legs_planning_group_);
             robo_traj->addSuffixWayPoint(*all_legs_current_robot_state_, 0.0);
@@ -407,6 +468,9 @@ private:
                         exec_action_client_->async_cancel_goal(goal_handle);
                     }
                 }
+            }
+            if (walking_initialized_ == false) {
+                initialized = true;
             }
         }
     }
@@ -501,6 +565,7 @@ private:
     rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr state_service_;
     rclcpp::Service<std_srvs::srv::SetBool>::SharedPtr walk_service_; 
     std::atomic<bool> is_walking_{false};
+    std::atomic<bool> walking_initialized_{false};
     std::atomic<bool> keep_running_thread_{false};
     std::thread walking_thread_;
     rclcpp_action::Client<ExecuteTrajectory>::SharedPtr exec_action_client_;
