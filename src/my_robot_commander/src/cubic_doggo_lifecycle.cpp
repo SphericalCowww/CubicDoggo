@@ -215,7 +215,6 @@ private:
     }
     ///////////
     void legNamedTarget_(const std::string &name) {
-        is_walking_ = false;
         if (name == "stand") {
             all_legs_interface_->setNamedTarget("stand_mid");
             planAndExecute_();
@@ -273,9 +272,9 @@ private:
             moveit::core::RobotStatePtr phase_state = 
                 std::make_shared<moveit::core::RobotState>(*all_legs_current_robot_state_);
             for (std::size_t legIdx = 0; legIdx < legN; legIdx++) {
-                double target_x = home_x[legIdx];
-                double target_y = home_y[legIdx];
-                double target_z = home_z[legIdx];
+                double target_x = home_x_[legIdx];
+                double target_y = home_y_[legIdx];
+                double target_z = home_z_[legIdx];
 
                 bool is_group_a = (legIdx == 0 || legIdx == 3);
                 bool is_group_b = (legIdx == 1 || legIdx == 2);
@@ -301,7 +300,7 @@ private:
                 leg_pose.position.y = target_y;
                 leg_pose.position.z = target_z;
 
-                auto leg_model_group = all_legs_robot_model->getJointModelGroup(planning_group_[legIdx]);
+                auto leg_model_group = all_legs_robot_model_->getJointModelGroup(planning_group_[legIdx]);
                 success_ = phase_state->setFromIK(leg_model_group, leg_pose, endEffector_link_[legIdx]);
                 if (success_ == false) {
                     RCLCPP_ERROR(get_logger(), "CubicDoggoLifecycleManager:linearWalkGait(): "
@@ -323,9 +322,9 @@ private:
             moveit::core::RobotStatePtr phase_state = 
                 std::make_shared<moveit::core::RobotState>(*all_legs_current_robot_state_);
             for (std::size_t legIdx = 0; legIdx < legN; legIdx++) {
-                double target_x = home_x[legIdx];
-                double target_y = home_y[legIdx];
-                double target_z = home_z[legIdx];
+                double target_x = home_x_[legIdx];
+                double target_y = home_y_[legIdx];
+                double target_z = home_z_[legIdx];
 
                 bool is_group_a = (legIdx == 0 || legIdx == 3);
                 bool is_group_b = (legIdx == 1 || legIdx == 2);
@@ -361,7 +360,7 @@ private:
                 leg_pose.position.y = target_y;
                 leg_pose.position.z = target_z;
 
-                auto leg_model_group = all_legs_robot_model->getJointModelGroup(planning_group_[legIdx]);
+                auto leg_model_group = all_legs_robot_model_->getJointModelGroup(planning_group_[legIdx]);
                 success_ = phase_state->setFromIK(leg_model_group, leg_pose, endEffector_link_[legIdx]);
                 if (success_ == false) {
                     RCLCPP_ERROR(get_logger(), "CubicDoggoLifecycleManager:triangleWalkGait(): "
@@ -399,8 +398,7 @@ private:
         double maxVelScale = 1.0;
         double maxAccScale = 1.0;
         
-        auto all_legs_robot_model = all_legs_interface_->getRobotModel();
-        std::array<double, legN> home_x, home_y, home_z;
+        all_legs_robot_model_ = all_legs_interface_->getRobotModel();
         bool home_captured = false;
         while (keep_running_thread_ && rclcpp::ok()) {
             if (is_walking_ == false) {
@@ -416,9 +414,9 @@ private:
             loadCurrentRobotState_();
             if (home_captured == false) {
                 for (std::size_t legIdx = 0; legIdx < legN; legIdx++) {
-                    home_x[legIdx] = endEffector_x_[legIdx];
-                    home_y[legIdx] = endEffector_y_[legIdx];
-                    home_z[legIdx] = endEffector_z_[legIdx];
+                    home_x_[legIdx] = endEffector_x_[legIdx];
+                    home_y_[legIdx] = endEffector_y_[legIdx];
+                    home_z_[legIdx] = endEffector_z_[legIdx];
                 }
                 home_captured = true;
                 RCLCPP_INFO(get_logger(), "CubicDoggoLifecycleManager:walkingLoop_(): home positions captured.");
@@ -429,7 +427,7 @@ private:
             std::vector<moveit::core::RobotStatePtr> gait_waypoints = triangleWalkGait_(0.03, 0.015);
             ////////////////
             
-            auto robo_traj = std::make_shared<robot_trajectory::RobotTrajectory>(all_legs_robot_model, 
+            auto robo_traj = std::make_shared<robot_trajectory::RobotTrajectory>(all_legs_robot_model_, 
                                                                                  all_legs_planning_group_);
             robo_traj->addSuffixWayPoint(*all_legs_current_robot_state_, 0.0);
             for (const auto& state : gait_waypoints) {
@@ -470,7 +468,7 @@ private:
                 }
             }
             if (walking_initialized_ == false) {
-                initialized = true;
+                walking_initialized_ = true;
             }
         }
     }
@@ -568,6 +566,8 @@ private:
     std::atomic<bool> walking_initialized_{false};
     std::atomic<bool> keep_running_thread_{false};
     std::thread walking_thread_;
+    std::array<double, legN> home_x_, home_y_, home_z_;
+    moveit::core::RobotModelConstPtr all_legs_robot_model_;
     rclcpp_action::Client<ExecuteTrajectory>::SharedPtr exec_action_client_;
 };
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
