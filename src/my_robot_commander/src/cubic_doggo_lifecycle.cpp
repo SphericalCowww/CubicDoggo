@@ -14,6 +14,7 @@
 #include <moveit/robot_model/robot_model.hpp>
 #include <moveit/robot_trajectory/robot_trajectory.hpp>
 #include <moveit/trajectory_processing/time_optimal_trajectory_generation.hpp>
+#include <moveit/trajectory_processing/ruckig_traj_smoothing.hpp>
 #include <geometry_msgs/msg/pose_stamped.hpp>
 #include <moveit_msgs/action/execute_trajectory.hpp>
  
@@ -489,6 +490,7 @@ private:
     void walkingLoop_() {
         double maxVelScale = 1.0;
         double maxAccScale = 1.0;
+        double maxJrkScale = 1.0;
         
         all_legs_robot_model_ = all_legs_interface_->getRobotModel();
         bool home_captured = false;
@@ -527,8 +529,10 @@ private:
                 robo_traj->addSuffixWayPoint(*state, 0.0); 
             }
             
-            trajectory_processing::TimeOptimalTrajectoryGeneration traj_gen;
-            success_ = traj_gen.computeTimeStamps(*robo_traj, maxVelScale, maxAccScale);
+            //trajectory_processing::TimeOptimalTrajectoryGeneration traj_gen;
+            //success_ = traj_gen.computeTimeStamps(*robo_traj, maxVelScale, maxAccScale);
+            trajectory_processing::RuckigSmoothing traj_gen;
+            success_ = traj_gen.computeTimeStamps(*robo_traj, maxVelScale, maxAccScale, maxJrkScale);
             if (success_ == false) {
                 RCLCPP_ERROR(get_logger(), "CubicDoggoLifecycleManager:walkingLoop_(): "
                                            "robot trajectory timing generation failed");
