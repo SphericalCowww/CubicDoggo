@@ -377,6 +377,89 @@ private:
         }
         return gait_waypoints;
     }
+    std::vector<moveit::core::RobotStatePtr> triangleForwardWalkGait_(double lift, double stride) {
+        std::vector<moveit::core::RobotStatePtr> gait_waypoints;
+        for (int trajIdx = 0; trajIdx < 4; trajIdx++) { 
+            moveit::core::RobotStatePtr phase_state = 
+                std::make_shared<moveit::core::RobotState>(*all_legs_current_robot_state_);
+            for (std::size_t legIdx = 0; legIdx < legN; legIdx++) {
+                double target_x = home_x_[legIdx];
+                double target_y = home_y_[legIdx];
+                double target_z = home_z_[legIdx];
+
+                bool is_group_a = (legIdx == 0 || legIdx == 3);
+                bool is_group_b = (legIdx == 1 || legIdx == 2);
+                if (walking_initialized_ == false) {
+                    if (trajIdx == 0) {
+                        if (is_group_a == true) {
+                            target_y += stride/2.0;
+                            target_z -= lift; 
+                        }
+                    } else if (trajIdx == 1) {
+                        if (is_group_a == true) {
+                            target_y += stride;
+                        }
+                    } else if (trajIdx == 2) {
+                        if (is_group_a == true) {
+                            target_y += stride;
+                        }
+                    } else if (trajIdx == 3) {
+                        if (is_group_a == true) {
+                            target_y += stride;
+                        }
+                    }
+                } else {
+                    if (trajIdx == 0) {
+                        if (is_group_a == true) { 
+                            target_y += stride/2.0; 
+                        }
+                        if (is_group_b  == true) { 
+                            target_y += stride/2.0;
+                            target_z -= lift;
+                        }
+                    } else if (trajIdx == 1) {
+                        if (is_group_a == true) { 
+                        } 
+                        if (is_group_b == true) { 
+                            target_y += stride;
+                        }
+                    } else if (trajIdx == 2) {
+                        if (is_group_a == true) {
+                            target_y += stride/2.0;
+                            target_z -= lift;
+                        }
+                        if (is_group_b == true) { 
+                            target_y += stride/2.0;
+                        }
+                    } else if (trajIdx == 3) {
+                        if (is_group_a == true) { 
+                            target_y += stride;
+                        } 
+                        if (is_group_b == true) { 
+                        }
+                    }
+                }
+                geometry_msgs::msg::Pose leg_pose = endEffector_pose_[legIdx].pose;
+                leg_pose.position.x = target_x;
+                leg_pose.position.y = target_y;
+                leg_pose.position.z = target_z;
+
+                auto leg_model_group = all_legs_robot_model_->getJointModelGroup(planning_group_[legIdx]);
+                success_ = phase_state->setFromIK(leg_model_group, leg_pose, endEffector_link_[legIdx]);
+                if (success_ == false) {
+                    RCLCPP_ERROR(get_logger(), "CubicDoggoLifecycleManager:triangleWalkGait_(): "
+                                               "IK failed for leg %zu in trajIdx %d", legIdx, trajIdx);
+                    is_walking_ = false;
+                    continue;
+                }
+            }
+            if (is_walking_ == false) {
+                break;
+            }
+            gait_waypoints.push_back(phase_state);
+        }
+        return gait_waypoints;
+    }
     std::vector<moveit::core::RobotStatePtr> triangleFineWalkGait_(double lift, double stride) {
         std::vector<moveit::core::RobotStatePtr> gait_waypoints;
         for (int trajIdx = 0; trajIdx < 8; trajIdx++) { 
@@ -518,7 +601,8 @@ private:
             
             ////////////////
             //std::vector<moveit::core::RobotStatePtr> gait_waypoints = linearWalkGait_(0.03, 0.03);
-            std::vector<moveit::core::RobotStatePtr> gait_waypoints = triangleWalkGait_(0.05, 0.03);
+            //std::vector<moveit::core::RobotStatePtr> gait_waypoints = triangleWalkGait_(0.05, 0.03);
+            std::vector<moveit::core::RobotStatePtr> gait_waypoints = triangleForwardWalkGait_(0.05, 0.03);
             //std::vector<moveit::core::RobotStatePtr> gait_waypoints = triangleFineWalkGait_(0.04, 0.03);
             ////////////////
             
@@ -532,7 +616,7 @@ private:
             //trajectory_processing::TimeOptimalTrajectoryGeneration traj_gen;
             //success_ = traj_gen.computeTimeStamps(*robo_traj, maxVelScale, maxAccScale);
             trajectory_processing::RuckigSmoothing traj_gen;
-            success_ = traj_gen.computeTimeStamps(*robo_traj, maxVelScale, maxAccScale, maxJrkScale);
+            success_ = traj_gen.applySmoothing(*robo_traj, maxVelScale, maxAccScale, maxJrkScale);
             if (success_ == false) {
                 RCLCPP_ERROR(get_logger(), "CubicDoggoLifecycleManager:walkingLoop_(): "
                                            "robot trajectory timing generation failed");
