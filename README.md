@@ -84,6 +84,9 @@ Debugging the ``joy_controller_node``:
     # sudo systemctl start robot_startup.service        # start right now too
     # sudo systemctl stop robot_startup.service         # stop right now
     # sudo systemctl disable robot_startup.service      # disable at reboot
+    # ps -ax | grep cubic_doggo.with_lifecycle.launch.py  # to find, kill, and restart the process
+    # kill $ID
+    # ros2 launch my_robot_bringup cubic_doggo.with_lifecycle.launch.py
 
 
 
