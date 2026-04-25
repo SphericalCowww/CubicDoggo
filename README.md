@@ -77,7 +77,7 @@ Debugging the ``joy_controller_node``:
     ## User=cubicdoggo
     ## ExecStart=/home/cubicdoggo/Documents/ROS_leggedRobot_testBed/start_robot.sh
     ## Restart=on-failure
-    ## RestartSec=5
+    ## RestartSec=300
     ## [Install]
     ## WantedBy=multi-user.target
     sudo systemctl daemon-reload                      # reload whenever there is a change
