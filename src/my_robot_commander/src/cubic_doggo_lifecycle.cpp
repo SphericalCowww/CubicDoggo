@@ -536,7 +536,7 @@ private:
             ////////////////
             //std::vector<moveit::core::RobotStatePtr> gait_waypoints = linearWalkGait_(0.03, 0.03);
             //std::vector<moveit::core::RobotStatePtr> gait_waypoints = triangleWalkGait_(0.05, 0.03);
-            std::vector<moveit::core::RobotStatePtr> gait_waypoints = triangleForwardWalkGait_(0.03, 0.06);
+            std::vector<moveit::core::RobotStatePtr> gait_waypoints = triangleForwardWalkGait_(0.03, 0.05);
             //std::vector<moveit::core::RobotStatePtr> gait_waypoints = triangleFineWalkGait_(0.04, 0.03);
             ////////////////
             
