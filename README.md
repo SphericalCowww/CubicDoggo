@@ -66,8 +66,8 @@ Debugging the ``joy_controller_node``:
     
 ### launch at the start of turning on rasp pi
 
-    chmod +x /home/cubicdoggo/Documents/ROS_leggedRobot_testBed/start_robot.sh
-    cp /home/cubicdoggo/Documents/ROS_leggedRobot_testBed/robot_startup.service /etc/systemd/system/robot_startup.service
+    chmod +x /home/cubicdoggo/Documents/CubicDoggo/start_robot.sh
+    cp /home/cubicdoggo/Documents/CubicDoggo/robot_startup.service /etc/systemd/system/robot_startup.service
     sudo systemctl daemon-reload                                           # reload whenever there is a change
     sudo systemctl enable robot_startup.service                            # now will start at reboot
     # sudo systemctl restart robot_startup.service                         # restart, even if is rrunning
