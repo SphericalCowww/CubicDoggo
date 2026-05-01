@@ -67,26 +67,13 @@ Debugging the ``joy_controller_node``:
 ### launch at the start of turning on rasp pi
 
     chmod +x /home/cubicdoggo/Documents/ROS_leggedRobot_testBed/start_robot.sh
-    sudo vim /etc/systemd/system/robot_startup.service
-    # filling the following:
-    ## [Unit]
-    ## Description=Cubic Doggo Robot Bringup
-    ## After=network.target
-    ## [Service]
-    ## Type=simple
-    ## User=cubicdoggo
-    ## ExecStart=/home/cubicdoggo/Documents/ROS_leggedRobot_testBed/start_robot.sh
-    ## Restart=no
-    ## [Install]
-    ## WantedBy=multi-user.target
-    sudo systemctl daemon-reload                      # reload whenever there is a change
-    sudo systemctl enable robot_startup.service       # now will start at reboot
-    # sudo systemctl start robot_startup.service        # start right now too
-    # sudo systemctl stop robot_startup.service         # stop right now
-    # sudo systemctl disable robot_startup.service      # disable at reboot
-    # ps -ax | grep cubic_doggo.with_lifecycle.launch.py  # to find, kill, and restart the process
-    # kill $ID
-    # ros2 launch my_robot_bringup cubic_doggo.with_lifecycle.launch.py
+    cp /home/cubicdoggo/Documents/ROS_leggedRobot_testBed/robot_startup.service /etc/systemd/system/robot_startup.service
+    sudo systemctl daemon-reload                                           # reload whenever there is a change
+    sudo systemctl enable robot_startup.service                            # now will start at reboot
+    # sudo systemctl restart robot_startup.service                         # restart, even if is rrunning
+    # sudo systemctl stop    robot_startup.service                         # stop right now, kill all relevant nodes
+    # sudo systemctl disable robot_startup.service                         # disable at reboot
+    # journalctl -u robot_startup.service -n 100 > start_robot_output.txt  # to check the output
 
 
 
