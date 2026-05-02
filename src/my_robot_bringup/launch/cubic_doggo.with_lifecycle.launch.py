@@ -7,6 +7,7 @@ from launch.actions import IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from moveit_configs_utils import MoveItConfigsBuilder
 import os
+import platform
 
 ######################################################################################################################
 def generate_launch_description():
@@ -92,8 +93,15 @@ def generate_launch_description():
         executable="cubic_doggo_joy_control",
         remappings=[("joy", "/joy")] 
     )
-    
-    return LaunchDescription([
+
+    if platform.machine() == 'aarch64':
+        peripheral_node = Node(
+            package="my_robot_bringup",
+            executable="pi_peripheral_node",
+            parameters=[{"voltage_threshold": 10.5}]
+    )    
+
+    launch_entities = [
         SetParameter(name="jump_threshold", value=0.15),
         SetParameter(name="use_sim_time", value=False),
         robot_state_publisher_node,
@@ -105,6 +113,10 @@ def generate_launch_description():
         #rviz_node,
         joy_driver_node,
         joy_controller_node,
-    ])
+    ]
+    if platform.machine() == 'aarch64':
+        launch_entities.append(peripheral_node) 
+    
+    return LaunchDescription(launch_entities)
 
 ######################################################################################################################

@@ -17,7 +17,10 @@ find_package(my_robot_interface REQUIRED)
 add_executable(cubic_doggo_lifecycle src/cubic_doggo_lifecycle.cpp)
 ament_target_dependencies(cubic_doggo_lifecycle rclcpp moveit_ros_planning_interface moveit_core example_interfaces my_robot_interface)
 
-install(TARGETS cubic_doggo_lifecycle
+add_executable(rasp_pi_peripheral_node src/rasp_pi_peripheral_node.cpp)
+ament_target_dependencies(rasp_pi_peripheral_node example_interfaces my_robot_interface)
+ 
+install(TARGETS cubic_doggo_lifecycle rasp_pi_peripheral
   DESTINATION lib/${PROJECT_NAME}
 )
 
