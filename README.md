@@ -69,8 +69,8 @@ Debugging the ``joy_controller_node``:
     chmod +x /home/cubicdoggo/Documents/CubicDoggo/start_robot.sh
     sudo cp /home/cubicdoggo/Documents/CubicDoggo/robot_startup.service /etc/systemd/system/robot_startup.service
     sudo chmod 644 /etc/systemd/system/robot_startup.service
-    sudo systemctl daemon-reload                                           # reload whenever there is a change
     sudo systemctl enable robot_startup.service                            # now will start at reboot
+    sudo systemctl daemon-reload                                           # reload whenever there is a change
     # sudo systemctl restart robot_startup.service                         # restart, even if is rrunning
     # sudo systemctl stop    robot_startup.service                         # stop right now, kill all relevant nodes
     # sudo systemctl disable robot_startup.service                         # disable at reboot
