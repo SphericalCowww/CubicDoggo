@@ -56,7 +56,13 @@ public:
     CallbackReturn on_configure(const rclcpp_lifecycle::State &) override {
         RCLCPP_INFO(get_logger(), "CubicDoggoLifecycleManager:on_configure(): %s", current_lifecycle_state_.c_str());
 
-        if (!exec_action_client_->wait_for_action_server(std::chrono::seconds(5))) {
+        auto now = this->now();
+        if (now.seconds() < 1577836800) { 
+            RCLCPP_ERROR(get_logger(), "CubicDoggoLifecycleManager:on_configure(): "
+                                       "system clock not synced (Still in 1970s). Failing to restart...");
+            return CallbackReturn::FAILURE;
+        }
+        if (!exec_action_client_->wait_for_action_server(std::chrono::seconds(2))) {
             RCLCPP_ERROR(get_logger(), "CubicDoggoLifecycleManager:on_configure(): "
                                        "ExecuteTrajectory action server not available");
             return CallbackReturn::FAILURE;
@@ -64,17 +70,19 @@ public:
 
         for (std::size_t legIdx = 0; legIdx < legN; legIdx++) {
             leg_interface_[legIdx] = std::make_shared<MoveGroupInterface>(moveit_node_, planning_group_[legIdx]);
-            while (rclcpp::ok() && !leg_interface_[legIdx]->startStateMonitor(1.0)) {
-                RCLCPP_INFO(get_logger(), "CubicDoggoLifecycleManager:on_configure(): "
-                                          "waiting for valid MoveGroupInterface state %s",
-                            planning_group_[legIdx].c_str());
+            if (!leg_interface_[legIdx]->startStateMonitor(2.0)) {
+                RCLCPP_ERROR(get_logger(), "CubicDoggoLifecycleManager:on_configure(): "
+                                           "MoveGroupInterface state %s invalide",
+                             planning_group_[legIdx].c_str());
+                return CallbackReturn::FAILURE;
             }
         }
         all_legs_interface_ = std::make_shared<MoveGroupInterface>(moveit_node_, all_legs_planning_group_);
-        while (rclcpp::ok() && !all_legs_interface_->startStateMonitor(1.0)) {
-            RCLCPP_INFO(get_logger(), "CubicDoggoLifecycleManager:on_configure(): "
-                                      "waiting for valid MoveGroupInterface state %s", 
-                        all_legs_planning_group_.c_str());
+        if (!all_legs_interface_->startStateMonitor(2.0)) {
+            RCLCPP_ERROR(get_logger(), "CubicDoggoLifecycleManager:on_configure(): "
+                                       "MoveGroupInterface state %s invalide", 
+                         all_legs_planning_group_.c_str());
+            return CallbackReturn::FAILURE;
         }
         for (std::size_t legIdx = 0; legIdx < legN; legIdx++) {
             leg_interface_[legIdx]->setEndEffectorLink(endEffector_link_[legIdx]);

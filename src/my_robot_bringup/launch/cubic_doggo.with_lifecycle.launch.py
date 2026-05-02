@@ -65,7 +65,7 @@ def generate_launch_description():
             {"jump_threshold": 0.15},                  # for computeCartesianPath
         ],
     )
-
+    
     rviz_node = Node(
         package="rviz2",
         executable="rviz2",

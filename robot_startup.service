@@ -1,12 +1,12 @@
-sudo vim /etc/systemd/system/robot_startup.service
-
 [Unit]
 Description=Cubic Doggo Robot Bringup
-After=network.target
+After=network-online.target time-sync.target
+Wants=network-online.target time-sync.target
 
 [Service]
 Type=simple
 User=kali
+ExecStartPre=/bin/bash -c "until [ -e /dev/ttyUSB0 ]; do sleep 1; done"
 ExecStart=/home/kali/Documents/CubicDoggo/start_robot.sh
 KillMode=control-group
 # Restart=no
