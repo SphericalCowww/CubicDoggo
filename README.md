@@ -66,6 +66,7 @@ Debugging the ``joy_controller_node``:
     
 ### launch at the start of turning on rasp pi
 
+    sudo chmod -R 777 /sys/class/leds/ACT/                                 # enable LED to indicate battery condition
     chmod +x /home/cubicdoggo/Documents/CubicDoggo/start_robot.sh
     sudo cp /home/cubicdoggo/Documents/CubicDoggo/robot_startup.service /etc/systemd/system/robot_startup.service
     sudo chmod 644 /etc/systemd/system/robot_startup.service
@@ -75,6 +76,8 @@ Debugging the ``joy_controller_node``:
     # sudo systemctl stop    robot_startup.service                         # stop right now, kill all relevant nodes
     # sudo systemctl disable robot_startup.service                         # disable at reboot
     # journalctl -u robot_startup.service -n 100 > start_robot_output.txt  # to check the output
+    # journalctl -u robot_startup.service -f
+    
 
 
 
