@@ -326,68 +326,8 @@ private:
         }
         return gait_waypoints;
     }
-    std::vector<moveit::core::RobotStatePtr> triangleWalkGait_(double lift, double stride) {
-        std::vector<moveit::core::RobotStatePtr> gait_waypoints;
-        for (int trajIdx = 0; trajIdx < 4; trajIdx++) { 
-            moveit::core::RobotStatePtr walk_state = 
-                std::make_shared<moveit::core::RobotState>(*last_walk_state_);
-            for (std::size_t legIdx = 0; legIdx < legN; legIdx++) {
-                double target_x = home_x_[legIdx];
-                double target_y = home_y_[legIdx];
-                double target_z = home_z_[legIdx];
-
-                bool is_group_a = (legIdx == 0 || legIdx == 3);
-                bool is_group_b = (legIdx == 1 || legIdx == 2);
-                if (trajIdx == 0) {
-                    if (is_group_a == true) { 
-                        target_z -= lift; 
-                    }
-                    if (is_group_b  == true) { 
-                    }
-                } else if (trajIdx == 1) {
-                    if (is_group_a == true) { 
-                        target_y += stride; 
-                    } 
-                    if (is_group_b == true) { 
-                        target_y -= stride; 
-                    }
-                } else if (trajIdx == 2) {
-                    if (is_group_a == true) {
-                    }
-                    if (is_group_b == true) { 
-                        target_z -= lift;
-                    }
-                } else if (trajIdx == 3) {
-                    if (is_group_a == true) { 
-                        target_y -= stride; 
-                    } 
-                    if (is_group_b == true) { 
-                        target_y += stride; 
-                    }
-                }
-                geometry_msgs::msg::Pose leg_pose = endEffector_pose_[legIdx].pose;
-                leg_pose.position.x = target_x;
-                leg_pose.position.y = target_y;
-                leg_pose.position.z = target_z;
-
-                auto leg_model_group = all_legs_robot_model_->getJointModelGroup(planning_group_[legIdx]);
-                success_ = walk_state->setFromIK(leg_model_group, leg_pose, endEffector_link_[legIdx]);
-                if (success_ == false) {
-                    RCLCPP_ERROR(get_logger(), "CubicDoggoLifecycleManager:triangleWalkGait_(): "
-                                               "IK failed for leg %zu in trajIdx %d", legIdx, trajIdx);
-                    is_walking_ = false;
-                    break;
-                }
-            }
-            if (is_walking_ == false) {
-                break;
-            }
-            gait_waypoints.push_back(walk_state);
-            last_walk_state_ = walk_state;
-        }
-        return gait_waypoints;
-    }
-    std::vector<moveit::core::RobotStatePtr> triangleForwardWalkGait_(double lift, double stride) {
+    std::vector<moveit::core::RobotStatePtr> triangleWalkGait_(double lift, double x_stride, double y_stride, 
+                                                               double y_shift) {
         std::vector<moveit::core::RobotStatePtr> gait_waypoints;
         for (int trajIdx = 0; trajIdx < 4; trajIdx++) { 
             moveit::core::RobotStatePtr walk_state = 
@@ -400,67 +340,69 @@ private:
                 bool is_group_b = (legIdx == 1 || legIdx == 2);
                 bool joint_hold_position = false;
                 if (walking_initialized_ == false) {
-                    if (trajIdx == 0) {
-                        if (is_group_a == true) {
-                            target_x = home_x_[legIdx];
-                            target_y = home_y_[legIdx] + stride/2.0;
-                            target_z = home_z_[legIdx] - lift; 
-                        }
-                    } else if (trajIdx == 1) {
-                        if (is_group_a == true) {
-                            target_x = home_x_[legIdx];
-                            target_y = home_y_[legIdx] + stride;
+                    if (is_group_a == true) {
+                        if (trajIdx == 0) {
+                            target_x = home_x_[legIdx] + x_stride/2.0;
+                            target_y = home_y_[legIdx] + y_stride/2.0 + y_shift/2.0;
+                            target_z = home_z_[legIdx] - lift;
+                        } else if (trajIdx == 1) {
+                            target_x = home_x_[legIdx] + x_stride;
+                            target_y = home_y_[legIdx] + y_stride     + y_shift;
                             target_z = home_z_[legIdx];
+                        } else {
+                            joint_hold_position = true;
                         }
-                    } else {
-                        joint_hold_position = true;
                     }
                     if (is_group_b == true) {
-                        joint_hold_position = true;
+                        if (trajIdx == 0) {
+                            target_x = home_x_[legIdx];
+                            target_y = home_y_[legIdx]                + y_shift/2.0;
+                            target_z = home_z_[legIdx];
+                        }
+                        if (trajIdx == 1) {
+                            target_x = home_x_[legIdx];
+                            target_y = home_y_[legIdx]                + y_shift;
+                            target_z = home_z_[legIdx];
+                        } else {
+                            joint_hold_position = true;
+                        }
                     }
                 } else {
-                    if (trajIdx == 0) {
-                        if (is_group_a == true) {
+                    if (is_group_a == true) {
+                        if (trajIdx == 0) {
+                            target_x = home_x_[legIdx] + x_stride/2.0;
+                            target_y = home_y_[legIdx] + y_stride/2.0 + y_shift;
+                            target_z = home_z_[legIdx];
+                        } else if (trajIdx == 1) {
                             target_x = home_x_[legIdx];
-                            target_y = home_y_[legIdx] + stride/2.0;
+                            target_y = home_y_[legIdx]                + y_shift;
+                            target_z = home_z_[legIdx];
+                        } else if (trajIdx == 2) {
+                            target_x = home_x_[legIdx] + x_stride/2.0;
+                            target_y = home_y_[legIdx] + y_stride/2.0 + y_shift;
+                            target_z = home_z_[legIdx] - lift;
+                        } else if (trajIdx == 3) {
+                            target_x = home_x_[legIdx] + x_stride;
+                            target_y = home_y_[legIdx] + y_stride     + y_shift;
                             target_z = home_z_[legIdx]; 
                         }
-                        if (is_group_b  == true) { 
-                            target_x = home_x_[legIdx]; 
-                            target_y = home_y_[legIdx] + stride/2.0;
+                    }
+                    if (is_group_b == true) {
+                        if (trajIdx == 0) {
+                            target_x = home_x_[legIdx] + x_stride/2.0; 
+                            target_y = home_y_[legIdx] + y_stride/2.0 + y_shift;
                             target_z = home_z_[legIdx] - lift;
-                        }
-                    } else if (trajIdx == 1) {
-                        if (is_group_a == true) {
-                            target_x = home_x_[legIdx];
-                            target_y = home_y_[legIdx];
+                        } else if (trajIdx == 1) {
+                            target_x = home_x_[legIdx] + x_stride;
+                            target_y = home_y_[legIdx] + y_stride     + y_shift;
                             target_z = home_z_[legIdx];
-                        } 
-                        if (is_group_b == true) { 
-                            target_x = home_x_[legIdx];
-                            target_y = home_y_[legIdx] + stride;
+                        } else if (trajIdx == 2) {
+                            target_x = home_x_[legIdx] + x_stride/2.0; 
+                            target_y = home_y_[legIdx] + y_stride/2.0 + y_shift;
                             target_z = home_z_[legIdx];
-                        }
-                    } else if (trajIdx == 2) {
-                        if (is_group_a == true) {
+                        } else if (trajIdx == 3) {
                             target_x = home_x_[legIdx];
-                            target_y = home_y_[legIdx] + stride/2.0;
-                            target_z = home_z_[legIdx] - lift;
-                        }
-                        if (is_group_b == true) {
-                            target_x = home_x_[legIdx]; 
-                            target_y = home_y_[legIdx] + stride/2.0;
-                            target_z = home_z_[legIdx];
-                        }
-                    } else if (trajIdx == 3) {
-                        if (is_group_a == true) { 
-                            target_x = home_x_[legIdx];
-                            target_y = home_y_[legIdx] + stride;
-                            target_z = home_z_[legIdx]; 
-                        } 
-                        if (is_group_b == true) { 
-                            target_x = home_x_[legIdx];
-                            target_y = home_y_[legIdx];
+                            target_y = home_y_[legIdx]                + y_shift;
                             target_z = home_z_[legIdx];
                         }
                     }
@@ -513,9 +455,9 @@ private:
         response->message = is_walking_ ? "walking started" : "walking stopped";
     }
     void walkingLoop_() {
-        double maxVelScale = 1.0;
-        double maxAccScale = 1.0;
-        double maxJrkScale = 1.0;
+        double maxVelScale = 0.05;
+        double maxAccScale = 0.5;
+        double maxJrkScale = 0.3;
         
         all_legs_robot_model_ = all_legs_interface_->getRobotModel();
         bool home_captured = false;
@@ -543,9 +485,7 @@ private:
             
             ////////////////
             //std::vector<moveit::core::RobotStatePtr> gait_waypoints = linearWalkGait_(0.03, 0.03);
-            //std::vector<moveit::core::RobotStatePtr> gait_waypoints = triangleWalkGait_(0.05, 0.03);
-            std::vector<moveit::core::RobotStatePtr> gait_waypoints = triangleForwardWalkGait_(0.03, 0.05);
-            //std::vector<moveit::core::RobotStatePtr> gait_waypoints = triangleFineWalkGait_(0.04, 0.03);
+            std::vector<moveit::core::RobotStatePtr> gait_waypoints = triangleWalkGait_(0.03, 0.02, 0.06, -0.03);
             ////////////////
             
             auto robo_traj = std::make_shared<robot_trajectory::RobotTrajectory>(all_legs_robot_model_, 
