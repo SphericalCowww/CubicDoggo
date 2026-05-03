@@ -64,18 +64,26 @@ Debugging the ``joy_controller_node``:
     ros2 topic info /joy --verbose
     ros2 topic echo /joy
     
+### check low battery alarm
+
+    for d in /sys/class/hwmon/hwmon*; do echo -n "$d: "; cat "$d/name"; done   # find the correct path for power alarm
+    # update /home/cubicdoggo/Documents/CubicDoggo/src/my_robot_bringup/launch/cubic_doggo.with_lifecycle.launch.py
+    echo timer | sudo tee /sys/class/leds/ACT/trigger                          # trigger LED first
+    sudo chmod -R 777 /sys/class/leds/ACT/                                     # enable LED to indicate battery condition
+    # test the node if needed
+    ros2 run my_robot_commander rasp_pi_peripheral_node --ros-args -p power_path:=$(which ever power alarm path)
+
 ### launch at the start of turning on rasp pi
-    echo timer | sudo tee /sys/class/leds/ACT/trigger                      # trigger LED first
-    sudo chmod -R 777 /sys/class/leds/ACT/                                 # enable LED to indicate battery condition
+
     chmod +x /home/cubicdoggo/Documents/CubicDoggo/start_robot.sh
     sudo cp /home/cubicdoggo/Documents/CubicDoggo/robot_startup.service /etc/systemd/system/robot_startup.service
     sudo chmod 644 /etc/systemd/system/robot_startup.service
-    sudo systemctl enable robot_startup.service                            # now will start at reboot
-    sudo systemctl daemon-reload                                           # reload whenever there is a change
-    # sudo systemctl restart robot_startup.service                         # restart, even if is rrunning
-    # sudo systemctl stop    robot_startup.service                         # stop right now, kill all relevant nodes
-    # sudo systemctl disable robot_startup.service                         # disable at reboot
-    # journalctl -u robot_startup.service -n 100 > start_robot_output.txt  # to check the output
+    sudo systemctl enable robot_startup.service                                # now will start at reboot
+    sudo systemctl daemon-reload                                               # reload whenever there is a change
+    # sudo systemctl restart robot_startup.service                             # restart, even if is rrunning
+    # sudo systemctl stop    robot_startup.service                             # stop right now, kill all relevant nodes
+    # sudo systemctl disable robot_startup.service                             # disable at reboot
+    # journalctl -u robot_startup.service -n 100 > start_robot_output.txt      # to check the output
     # journalctl -u robot_startup.service -f
     
 
