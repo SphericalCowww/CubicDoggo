@@ -72,6 +72,8 @@ Debugging the ``joy_controller_node``:
     sudo chmod -R 777 /sys/class/leds/ACT/                                     # enable LED to indicate battery condition
     # test the node if needed
     ros2 run my_robot_commander rasp_pi_peripheral_node --ros-args -p power_path:=$(which ever power alarm path)
+    # create a fake alarm by
+    echo 1 > /tmp/fake_alarm
 
 ### launch at the start of turning on rasp pi
 
