@@ -65,7 +65,7 @@ Debugging the ``joy_controller_node``:
     ros2 topic echo /joy
     
 ### launch at the start of turning on rasp pi
-
+    echo timer | sudo tee /sys/class/leds/ACT/trigger                      # trigger LED first
     sudo chmod -R 777 /sys/class/leds/ACT/                                 # enable LED to indicate battery condition
     chmod +x /home/cubicdoggo/Documents/CubicDoggo/start_robot.sh
     sudo cp /home/cubicdoggo/Documents/CubicDoggo/robot_startup.service /etc/systemd/system/robot_startup.service
