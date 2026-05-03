@@ -64,7 +64,9 @@ Debugging the ``joy_controller_node``:
     ros2 topic info /joy --verbose
     ros2 topic echo /joy
     
-### check low battery alarm
+### check low power/battery alarm
+
+For the low rasp pi power alarm, it's set by the rasp_pi_peripheral_node:
 
     for d in /sys/class/hwmon/hwmon*; do echo -n "$d: "; cat "$d/name"; done   # find the correct path for power alarm
     # update /home/cubicdoggo/Documents/CubicDoggo/src/my_robot_bringup/launch/cubic_doggo.with_lifecycle.launch.py
@@ -74,6 +76,11 @@ Debugging the ``joy_controller_node``:
     ros2 run my_robot_commander rasp_pi_peripheral_node --ros-args -p power_path:=$(which ever power alarm path)
     # create a fake alarm by
     echo 1 > /tmp/fake_alarm
+
+For the low servo voltage alarm, set directly using XL430-W250-T:
+
+    # Register 32 (Min Voltage Limit): Set this to 95 or 100 (for 9.5V or 10.0V).
+    # Register 25 (LED Error Policy):  Set Bit 0 to 1.       (for if voltage error, blink the LED)
 
 ### launch at the start of turning on rasp pi
 
