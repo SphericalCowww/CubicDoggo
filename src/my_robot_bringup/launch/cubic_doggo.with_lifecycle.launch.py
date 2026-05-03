@@ -94,11 +94,13 @@ def generate_launch_description():
         remappings=[("joy", "/joy")] 
     )
 
-    if platform.machine() == 'aarch64':
-        peripheral_node = Node(
-            package="my_robot_bringup",
-            executable="pi_peripheral_node",
-            parameters=[{"voltage_threshold": 10.5}]
+    peripheral_node = Node(
+        package="my_robot_commander",
+        executable="rasp_pi_peripheral_node",
+        output="screen", 
+        emulate_tty=True,
+        parameters=[{"power_path": "/sys/class/hwmon/hwmon3/in0_lcrit_alarm",
+                     "led_path":   "/sys/class/leds/ACT/"}]
     )    
 
     launch_entities = [
@@ -113,9 +115,8 @@ def generate_launch_description():
         #rviz_node,
         joy_driver_node,
         joy_controller_node,
+        peripheral_node,
     ]
-    if platform.machine() == 'aarch64':
-        launch_entities.append(peripheral_node) 
     
     return LaunchDescription(launch_entities)
 
