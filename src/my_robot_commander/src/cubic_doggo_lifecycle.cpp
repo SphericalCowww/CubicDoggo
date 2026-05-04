@@ -455,9 +455,8 @@ private:
         response->message = is_walking_ ? "walking started" : "walking stopped";
     }
     void walkingLoop_() {
-        double maxVelScale = 0.05;
-        double maxAccScale = 0.5;
-        double maxJrkScale = 0.3;
+        double maxVelScale = 1.0, maxAccScale = 1.0;
+        //double maxVelScale = 0.2, maxAccScale = 0.5, maxJrkScale = 0.05;
         
         all_legs_robot_model_ = all_legs_interface_->getRobotModel();
         bool home_captured = false;
@@ -484,7 +483,7 @@ private:
             
             ////////////////
             //std::vector<moveit::core::RobotStatePtr> gait_waypoints = linearWalkGait_(0.03, 0.03);
-            std::vector<moveit::core::RobotStatePtr> gait_waypoints = triangleWalkGait_(0.03, 0.02, 0.06, -0.03);
+            std::vector<moveit::core::RobotStatePtr> gait_waypoints = triangleWalkGait_(0.02, 0.0, 0.06, -0.03);
             ////////////////
             
             auto robo_traj = std::make_shared<robot_trajectory::RobotTrajectory>(all_legs_robot_model_, 
@@ -495,10 +494,10 @@ private:
             }
            
             setDefaultVelAccScaler_(1.0, 1.0); 
-            //trajectory_processing::TimeOptimalTrajectoryGeneration traj_gen;
-            //success_ = traj_gen.computeTimeStamps(*robo_traj, maxVelScale, maxAccScale);
-            trajectory_processing::RuckigSmoothing traj_gen;
-            success_ = traj_gen.applySmoothing(*robo_traj, maxVelScale, maxAccScale, maxJrkScale);
+            trajectory_processing::TimeOptimalTrajectoryGeneration traj_gen;
+            success_ = traj_gen.computeTimeStamps(*robo_traj, maxVelScale, maxAccScale);
+            //trajectory_processing::RuckigSmoothing traj_gen;
+            //success_ = traj_gen.applySmoothing(*robo_traj, maxVelScale, maxAccScale, maxJrkScale);
             if (success_ == false) {
                 RCLCPP_ERROR(get_logger(), "CubicDoggoLifecycleManager:walkingLoop_(): "
                                            "robot trajectory timing generation failed");

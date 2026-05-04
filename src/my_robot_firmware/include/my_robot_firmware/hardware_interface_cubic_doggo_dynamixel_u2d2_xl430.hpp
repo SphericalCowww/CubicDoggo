@@ -67,7 +67,7 @@ namespace cubic_doggo_namespace {
             int32_t dxl_voltages_[12];
             int32_t dxl_leds_    [12];
             rclcpp::Time last_blink_timestamp_;
-            bool low_voltage_state_ = false;
+            bool led_blink_state_ = false;
     };    
 }
 
