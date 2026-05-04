@@ -59,6 +59,15 @@ namespace cubic_doggo_namespace {
             uint8_t handler_index_read_eff_;
 
             void initialize_servo_(uint8_t servo_id);
+
+            const int32_t VOLTAGE_THRESHOLD = 105;      // for detecting low battery 
+            const double blink_per          = 0.5;      // blinking per _ second
+            int handler_index_read_volt_;
+            int handler_index_write_led_;
+            int32_t dxl_voltages_[12];
+            int32_t dxl_leds_    [12];
+            rclcpp::Time last_blink_timestamp_;
+            bool low_voltage_state_ = false;
     };    
 }
 

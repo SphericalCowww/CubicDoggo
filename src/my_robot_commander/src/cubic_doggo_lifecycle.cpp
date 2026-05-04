@@ -469,7 +469,6 @@ private:
                 continue;
             } else if (walking_initialized_ == false) {
                 legNamedTarget_("stand");
-                setDefaultVelAccScaler_(maxVelScale, maxAccScale);
             }
             loadCurrentRobotState_();
             last_walk_state_ = std::make_shared<moveit::core::RobotState>(*all_legs_current_robot_state_);
@@ -494,7 +493,8 @@ private:
             for (const auto& state : gait_waypoints) {
                 robo_traj->addSuffixWayPoint(*state, 0.05); 
             }
-            
+           
+            setDefaultVelAccScaler_(1.0, 1.0); 
             //trajectory_processing::TimeOptimalTrajectoryGeneration traj_gen;
             //success_ = traj_gen.computeTimeStamps(*robo_traj, maxVelScale, maxAccScale);
             trajectory_processing::RuckigSmoothing traj_gen;

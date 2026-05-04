@@ -109,6 +109,12 @@ namespace cubic_doggo_namespace {
         handler_index_read_eff_ = dxl_wb_.getTheNumberOfSyncReadHandler() - 1;
         dxl_wb_.addSyncWriteHandler(servo_channels_[0], "Goal_Position", &log_);
         handler_index_write_pos_ = dxl_wb_.getTheNumberOfSyncWriteHandler() - 1;
+
+        dxl_wb_.addSyncReadHandler(servo_channels_[0], "Present_Input_Voltage", &log_);
+        handler_index_read_volt_ = dxl_wb_.getTheNumberOfSyncReadHandler() - 1;
+        dxl_wb_.addSyncWriteHandler(servo_channels_[0], "LED", &log_);
+        handler_index_write_led_ = dxl_wb_.getTheNumberOfSyncWriteHandler() - 1;
+
         return hardware_interface::CallbackReturn::SUCCESS;
     }
     hardware_interface::CallbackReturn HardwareInterfaceU2D2_cubic_doggo::on_activate  
@@ -122,6 +128,9 @@ namespace cubic_doggo_namespace {
         for (uint8_t servo_idx = 0; servo_idx < servo_N_; servo_idx++) {
             set_state(joint_names[servo_idx]+"/position", rad_positions_[servo_idx]);
         }
+
+        last_blink_timestamp_ = get_clock()->now();
+
         return hardware_interface::CallbackReturn::SUCCESS;
     }
     hardware_interface::CallbackReturn HardwareInterfaceU2D2_cubic_doggo::on_deactivate
@@ -165,13 +174,13 @@ namespace cubic_doggo_namespace {
             set_state(joint_names[servo_idx]+"/velocity", rad_velocities_[servo_idx]);
             set_state(joint_names[servo_idx]+"/effort",   rad_efforts_   [servo_idx]);
         }
+
         return hardware_interface::return_type::OK;
     }
     hardware_interface::return_type HardwareInterfaceU2D2_cubic_doggo::write
         (const rclcpp::Time & time, const rclcpp::Duration & period) 
     {
         RCLCPP_DEBUG(get_logger(), "hardware_interface:write()");
-        (void) time;
         (void) period; 
         
         // see: src/my_robot_description/urdf/cubic_doggo.ros2_control.xacro
@@ -185,6 +194,24 @@ namespace cubic_doggo_namespace {
             RCLCPP_ERROR(get_logger(), "hardware_interface:write(): syncWrite fails");
             return hardware_interface::return_type::ERROR;
         }
+
+        if (blink_per < (time - last_blink_timestamp_).seconds()) {           //blinking when low voltage
+            last_blink_timestamp_ = time;
+            led_blink_state_      = !led_blink_state_;
+            dxl_wb_.syncRead(handler_index_read_volt_, servo_channels_, servo_N_, &log_);
+            dxl_wb_.getSyncReadData(handler_index_read_volt_, servo_channels_, servo_N_, dxl_voltages_, &log_);
+            for (uint8_t i = 0; i < servo_N_; i++) {
+                if ((0 < dxl_voltages_[i]) && (dxl_voltages_[i] < VOLTAGE_THRESHOLD)) {
+                    dxl_leds_[i] = led_blink_state_ ? 1 : 0;
+                    RCLCPP_WARN_THROTTLE(get_logger(), *get_clock(), 5000, "hardware_interface:write(): "
+                                         "Low Voltage on ID %d: %.1fV", servo_channels_[i], dxl_voltages_[i]/10.0);
+                } else {
+                    dxl_leds_[i] = 0;
+                }
+            }
+            dxl_wb_.syncWrite(handler_index_write_led_, servo_channels_, servo_N_, dxl_leds_, 1, &log_);
+        }
+
         return hardware_interface::return_type::OK;
     }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
