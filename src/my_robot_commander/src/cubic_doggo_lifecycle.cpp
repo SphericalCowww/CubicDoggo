@@ -436,6 +436,58 @@ private:
         }
         return gait_waypoints;
     }
+    std::vector<moveit::core::RobotStatePtr> sineWalkGait_(double lift, double stride)
+    {
+        std::vector<moveit::core::RobotStatePtr> gait_waypoints;
+        constexpr int waypoint_count = 100;
+        for (int wp = 0; wp < waypoint_count; wp++) {
+            double phase = (2.0*M_PI)*static_cast<double>(wp)/static_cast<double>(waypoint_count);
+            moveit::core::RobotStatePtr walk_state = std::make_shared<moveit::core::RobotState>(*last_walk_state_);
+            for (std::size_t legIdx = 0; legIdx < legN; legIdx++) {
+                double target_x = home_x_[legIdx];
+                double target_y = home_y_[legIdx];
+                double target_z = home_z_[legIdx];
+                bool is_group_a = (legIdx == 0 || legIdx == 3);
+                bool is_group_b = (legIdx == 1 || legIdx == 2);
+                
+                double local_phase = phase;
+                if (is_group_b) {
+                    local_phase += M_PI;
+                }
+                while (local_phase >= 2.0*M_PI) {
+                    local_phase -= 2.0*M_PI;
+                }
+
+                double y_offset = stride * std::sin(local_phase);
+                double z_offset = 0.0;
+                if (std::cos(local_phase) > 0.0) {
+                    z_offset = lift * std::cos(local_phase);
+                }
+                target_y += y_offset;
+                target_z -= z_offset;
+
+                geometry_msgs::msg::Pose leg_pose = endEffector_pose_[legIdx].pose;
+                leg_pose.position.x = target_x;
+                leg_pose.position.y = target_y;
+                leg_pose.position.z = target_z;
+
+                auto leg_model_group = all_legs_robot_model_->getJointModelGroup(planning_group_[legIdx]);
+                success_ = walk_state->setFromIK(leg_model_group, leg_pose, endEffector_link_[legIdx]);
+                if (success_ == false) {
+                    RCLCPP_ERROR(get_logger(), "CubicDoggoLifecycleManager:sineWalkGait_(): "
+                                               "IK failed for leg %zu at waypoint %d", legIdx, wp);
+                    is_walking_ = false;
+                    return {};
+                }
+            }
+            if (is_walking_ == false) {
+                break;
+            }
+            gait_waypoints.push_back(walk_state);
+            last_walk_state_ = walk_state;
+        }
+        return gait_waypoints;
+    }
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     void handleGetState_(const std::shared_ptr<std_srvs::srv::Trigger::Request> /*request*/,
                          std::shared_ptr<std_srvs::srv::Trigger::Response> response) {
