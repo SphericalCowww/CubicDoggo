@@ -115,9 +115,6 @@ public:
                         endEffector_x_[legIdx], endEffector_y_[legIdx], endEffector_z_[legIdx]);
         }
 
-        joint_publisher_ = this->create_publisher<trajectory_msgs::msg::JointTrajectory>(
-            "/all_legs_controller/joint_trajectory", 10);
-
         current_lifecycle_state_ = "state_configured";
         RCLCPP_INFO(get_logger(), "CubicDoggoLifecycleManager:on_configure(): %s", current_lifecycle_state_.c_str());
         return CallbackReturn::SUCCESS;
@@ -278,6 +275,167 @@ private:
                     legIdx, endEffector_x_[legIdx], endEffector_y_[legIdx], endEffector_z_[legIdx]);    
     }
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    std::vector<moveit::core::RobotStatePtr> linearWalkGait_(double lift, double stride) {
+        std::vector<moveit::core::RobotStatePtr> gait_waypoints;
+        for (int gaitPhase = 0; gaitPhase < 2; gaitPhase++) { 
+            moveit::core::RobotStatePtr walk_state = 
+                std::make_shared<moveit::core::RobotState>(*last_walk_state_);
+            for (std::size_t legIdx = 0; legIdx < legN; legIdx++) {
+                double target_x = home_x_[legIdx];
+                double target_y = home_y_[legIdx];
+                double target_z = home_z_[legIdx];
+
+                bool is_group_a = (legIdx == 0 || legIdx == 3);
+                bool is_group_b = (legIdx == 1 || legIdx == 2);
+                if (gaitPhase == 0) {
+                    if (is_group_a == true) { 
+                        target_y += stride; 
+                        target_z -= lift; 
+                    } 
+                    if (is_group_b == true) { 
+                        target_y -= stride; 
+                    }
+                } else if (gaitPhase == 1) {
+                    if (is_group_a == true) { 
+                        target_y -= stride;
+                    } 
+                    if (is_group_b == true) { 
+                        target_y += stride;
+                        target_z -= lift; 
+                    }
+                }
+                geometry_msgs::msg::Pose leg_pose = endEffector_pose_[legIdx].pose;
+                leg_pose.position.x = target_x;
+                leg_pose.position.y = target_y;
+                leg_pose.position.z = target_z;
+
+                auto leg_model_group = all_legs_robot_model_->getJointModelGroup(planning_group_[legIdx]);
+                success_ = walk_state->setFromIK(leg_model_group, leg_pose, endEffector_link_[legIdx]);
+                if (success_ == false) {
+                    RCLCPP_ERROR(get_logger(), "CubicDoggoLifecycleManager:linearWalkGait(): "
+                                               "IK failed for leg %zu in phase %d", legIdx, gaitPhase);
+                    is_walking_ = false;
+                    return {};
+                }
+            }
+            if (is_walking_ == false) {
+                break;
+            }
+            gait_waypoints.push_back(walk_state);
+            last_walk_state_ = walk_state;
+        }
+        return gait_waypoints;
+    }
+    std::vector<moveit::core::RobotStatePtr> triangleWalkGait_(double lift, double x_stride, double y_stride, 
+                                                               double y_shift) {
+        std::vector<moveit::core::RobotStatePtr> gait_waypoints;
+        for (int trajIdx = 0; trajIdx < 4; trajIdx++) { 
+            moveit::core::RobotStatePtr walk_state = 
+                std::make_shared<moveit::core::RobotState>(*last_walk_state_);
+            for (std::size_t legIdx = 0; legIdx < legN; legIdx++) {
+                double target_x = home_x_[legIdx];
+                double target_y = home_y_[legIdx];
+                double target_z = home_z_[legIdx];
+                bool is_group_a = (legIdx == 0 || legIdx == 3);
+                bool is_group_b = (legIdx == 1 || legIdx == 2);
+                bool joint_hold_position = false;
+                if (walking_initialized_ == false) {
+                    if (is_group_a == true) {
+                        if (trajIdx == 0) {
+                            target_x = home_x_[legIdx] + x_stride/2.0;
+                            target_y = home_y_[legIdx] + y_stride/2.0 + y_shift/2.0;
+                            target_z = home_z_[legIdx] - lift;
+                        } else if (trajIdx == 1) {
+                            target_x = home_x_[legIdx] + x_stride;
+                            target_y = home_y_[legIdx] + y_stride     + y_shift;
+                            target_z = home_z_[legIdx];
+                        } else {
+                            joint_hold_position = true;
+                        }
+                    }
+                    if (is_group_b == true) {
+                        if (trajIdx == 0) {
+                            target_x = home_x_[legIdx];
+                            target_y = home_y_[legIdx]                + y_shift/2.0;
+                            target_z = home_z_[legIdx];
+                        }
+                        if (trajIdx == 1) {
+                            target_x = home_x_[legIdx];
+                            target_y = home_y_[legIdx]                + y_shift;
+                            target_z = home_z_[legIdx];
+                        } else {
+                            joint_hold_position = true;
+                        }
+                    }
+                } else {
+                    if (is_group_a == true) {
+                        if (trajIdx == 0) {
+                            target_x = home_x_[legIdx] + x_stride/2.0;
+                            target_y = home_y_[legIdx] + y_stride/2.0 + y_shift;
+                            target_z = home_z_[legIdx];
+                        } else if (trajIdx == 1) {
+                            target_x = home_x_[legIdx];
+                            target_y = home_y_[legIdx]                + y_shift;
+                            target_z = home_z_[legIdx];
+                        } else if (trajIdx == 2) {
+                            target_x = home_x_[legIdx] + x_stride/2.0;
+                            target_y = home_y_[legIdx] + y_stride/2.0 + y_shift;
+                            target_z = home_z_[legIdx] - lift;
+                        } else if (trajIdx == 3) {
+                            target_x = home_x_[legIdx] + x_stride;
+                            target_y = home_y_[legIdx] + y_stride     + y_shift;
+                            target_z = home_z_[legIdx]; 
+                        }
+                    }
+                    if (is_group_b == true) {
+                        if (trajIdx == 0) {
+                            target_x = home_x_[legIdx] + x_stride/2.0; 
+                            target_y = home_y_[legIdx] + y_stride/2.0 + y_shift;
+                            target_z = home_z_[legIdx] - lift;
+                        } else if (trajIdx == 1) {
+                            target_x = home_x_[legIdx] + x_stride;
+                            target_y = home_y_[legIdx] + y_stride     + y_shift;
+                            target_z = home_z_[legIdx];
+                        } else if (trajIdx == 2) {
+                            target_x = home_x_[legIdx] + x_stride/2.0; 
+                            target_y = home_y_[legIdx] + y_stride/2.0 + y_shift;
+                            target_z = home_z_[legIdx];
+                        } else if (trajIdx == 3) {
+                            target_x = home_x_[legIdx];
+                            target_y = home_y_[legIdx]                + y_shift;
+                            target_z = home_z_[legIdx];
+                        }
+                    }
+                }
+                geometry_msgs::msg::Pose leg_pose = endEffector_pose_[legIdx].pose;
+                leg_pose.position.x = target_x;
+                leg_pose.position.y = target_y;
+                leg_pose.position.z = target_z;
+
+                auto leg_model_group = all_legs_robot_model_->getJointModelGroup(planning_group_[legIdx]);
+                if ((joint_hold_position == true) && (trajIdx > 0)) {
+                    auto leg_model_group = all_legs_robot_model_->getJointModelGroup(planning_group_[legIdx]);
+                    std::vector<double> prev_joint_values;
+                    gait_waypoints.back()->copyJointGroupPositions(leg_model_group, prev_joint_values);
+                    walk_state->setJointGroupPositions(leg_model_group, prev_joint_values);
+                } else {
+                    success_ = walk_state->setFromIK(leg_model_group, leg_pose, endEffector_link_[legIdx]);
+                    if (success_ == false) {
+                        RCLCPP_ERROR(get_logger(), "CubicDoggoLifecycleManager:triangleWalkGait_(): "
+                                                   "IK failed for leg %zu in trajIdx %d", legIdx, trajIdx);
+                        is_walking_ = false;
+                        break;
+                    }
+                }
+            }
+            if (is_walking_ == false) {
+                break;
+            }
+            gait_waypoints.push_back(walk_state);
+            last_walk_state_ = walk_state;
+        }
+        return gait_waypoints;
+    }
     std::vector<moveit::core::RobotStatePtr> sineWalkGait_(double lift, double x_stride, double y_stride,
                                                            double x_shift=0.0, double y_shift=0.0)
     {
@@ -352,52 +510,80 @@ private:
         response->message = is_walking_ ? "walking started" : "walking stopped";
     }
     void walkingLoop_() {
-        double waypoint_dt = 0.01; // 10ms per point
         double maxVelScale = 1.0, maxAccScale = 1.0;
         //double maxVelScale = 0.2, maxAccScale = 0.5, maxJrkScale = 0.05;
-         
+        
         all_legs_robot_model_ = all_legs_interface_->getRobotModel();
-        auto joint_model_group = all_legs_robot_model_->getJointModelGroup(all_legs_planning_group_);
-        std::vector<std::string> joint_names = joint_model_group->getActiveJointModelNames();
-    
+        bool home_captured = false;
         while (keep_running_thread_ && rclcpp::ok()) {
             if (is_walking_ == false) {
                 walking_initialized_ = false;
+                home_captured = false;
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
                 continue;
             } else if (walking_initialized_ == false) {
                 legNamedTarget_("stand");
-                setDefaultVelAccScaler_(1.0, 1.0);
-                loadCurrentRobotState_();
-                last_walk_state_ = std::make_shared<moveit::core::RobotState>(*all_legs_current_robot_state_);
+            }
+            loadCurrentRobotState_();
+            last_walk_state_ = std::make_shared<moveit::core::RobotState>(*all_legs_current_robot_state_);
+            if (home_captured == false) {
                 for (std::size_t legIdx = 0; legIdx < legN; legIdx++) {
                     home_x_[legIdx] = endEffector_x_[legIdx];
                     home_y_[legIdx] = endEffector_y_[legIdx];
                     home_z_[legIdx] = endEffector_z_[legIdx];
                 }
+                home_captured = true;
                 RCLCPP_INFO(get_logger(), "CubicDoggoLifecycleManager:walkingLoop_(): home positions captured.");
             }
-           
-            std::vector<moveit::core::RobotStatePtr> gait_waypoints = sineWalkGait_(0.03, 0.0, 0.03);
             
-            trajectory_msgs::msg::JointTrajectory traj_msg;
-            traj_msg.joint_names = joint_names;
-            traj_msg.header.stamp = this->now(); 
-
-            for (size_t way_idx = 0; way_idx < gait_waypoints.size(); way_idx++) {
-                trajectory_msgs::msg::JointTrajectoryPoint joint_traj_pt;
-                std::vector<double> positions;
-                gait_waypoints[way_idx]->copyJointGroupPositions(joint_model_group, positions);
-                joint_traj_pt.positions = positions;
-                joint_traj_pt.time_from_start = rclcpp::Duration::from_seconds((way_idx + 1) * waypoint_dt);
-                traj_msg.points.push_back(joint_traj_pt);
+            ////////////////
+            //std::vector<moveit::core::RobotStatePtr> gait_waypoints = linearWalkGait_(0.03, 0.03);
+            std::vector<moveit::core::RobotStatePtr> gait_waypoints = triangleWalkGait_(0.02, 0.0, 0.06, -0.03);
+            ////////////////
+            
+            auto robo_traj = std::make_shared<robot_trajectory::RobotTrajectory>(all_legs_robot_model_, 
+                                                                                 all_legs_planning_group_);
+            robo_traj->addSuffixWayPoint(*all_legs_current_robot_state_, 0.05);
+            for (const auto& state : gait_waypoints) {
+                robo_traj->addSuffixWayPoint(*state, 0.05); 
             }
-
-            joint_publisher_->publish(traj_msg);
-
-            double cycle_duration = gait_waypoints.size() * waypoint_dt;
-            std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(cycle_duration * 800)));
-
+           
+            setDefaultVelAccScaler_(1.0, 1.0); 
+            trajectory_processing::TimeOptimalTrajectoryGeneration traj_gen;
+            success_ = traj_gen.computeTimeStamps(*robo_traj, maxVelScale, maxAccScale);
+            //trajectory_processing::RuckigSmoothing traj_gen;
+            //success_ = traj_gen.applySmoothing(*robo_traj, maxVelScale, maxAccScale, maxJrkScale);
+            if (success_ == false) {
+                RCLCPP_ERROR(get_logger(), "CubicDoggoLifecycleManager:walkingLoop_(): "
+                                           "robot trajectory timing generation failed");
+                is_walking_ = false;
+                continue;
+            }
+            
+            moveit_msgs::msg::RobotTrajectory traj_msg;
+            robo_traj->getRobotTrajectoryMsg(traj_msg);
+            
+            auto exec_goal = ExecuteTrajectory::Goal();
+            exec_goal.trajectory = traj_msg;
+            
+            auto send_goal_options = rclcpp_action::Client<ExecuteTrajectory>::SendGoalOptions();
+            auto goal_handle_future = exec_action_client_->async_send_goal(exec_goal, send_goal_options);
+            if (goal_handle_future.wait_for(std::chrono::seconds(2)) == std::future_status::ready) {
+                auto goal_handle = goal_handle_future.get();
+                if (goal_handle) {
+                    auto result_future = exec_action_client_->async_get_result(goal_handle);
+                    while (rclcpp::ok() && is_walking_) {
+                        if (result_future.wait_for(std::chrono::milliseconds(10)) == std::future_status::ready) {
+                            break;
+                        }
+                    }
+                    if (!is_walking_) {
+                        RCLCPP_INFO(get_logger(), "CubicDoggoLifecycleManager:walkingLoop_(): "
+                                                  "walking stop requested, stopping goal");
+                        exec_action_client_->async_cancel_goal(goal_handle);
+                    }
+                }
+            }
             if (walking_initialized_ == false) {
                 walking_initialized_ = true;
             }
@@ -501,8 +687,6 @@ private:
     std::array<double, legN> home_x_, home_y_, home_z_;
     moveit::core::RobotModelConstPtr all_legs_robot_model_;
     rclcpp_action::Client<ExecuteTrajectory>::SharedPtr exec_action_client_;
-
-    rclcpp::Publisher<trajectory_msgs::msg::JointTrajectory>::SharedPtr joint_publisher_;
 };
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 int main(int argc, char **argv) {
