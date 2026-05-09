@@ -283,7 +283,7 @@ private:
     // Note: full cycle makes 2 x stride
     {
         constexpr int waypoint_count = 100;
-        const double  swing_fraction = 0.3;         // Note: 0.5 generate 2 phase gait
+        const double  swing_fraction = 0.5;         // Note: 0.5 generate 2 phase gait
 
         std::vector<moveit::core::RobotStatePtr> gait_waypoints;
         for (int wp = 0; wp < waypoint_count; wp++) {
@@ -374,9 +374,9 @@ private:
         response->message = is_walking_ ? "walking started" : "walking stopped";
     }
     void walkingLoop_() {
-        double waypoint_dt = 0.01; // 10ms per point
-        double lift, x_stride, y_stride = 0.02, 0.0, 0.025;
         double maxVelScale = 1.0, maxAccScale = 1.0;
+        double waypoint_dt = 0.01; // 10ms per point
+        double lift = 0.02, x_stride = 0.0, y_stride = 0.025;
          
         all_legs_robot_model_ = all_legs_interface_->getRobotModel();
         auto joint_model_group = all_legs_robot_model_->getJointModelGroup(all_legs_planning_group_);
@@ -389,7 +389,7 @@ private:
                 continue;
             } else if (walking_initialized_ == false) {
                 legNamedTarget_("stand");
-                setDefaultVelAccScaler_(1.0, 1.0);
+                setDefaultVelAccScaler_(maxVelScale, maxAccScale);
                 loadCurrentRobotState_();
                 last_walk_state_ = std::make_shared<moveit::core::RobotState>(*all_legs_current_robot_state_);
                 for (std::size_t legIdx = 0; legIdx < legN; legIdx++) {
