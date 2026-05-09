@@ -297,7 +297,13 @@ private:
                 bool is_group_b = (legIdx == 1 || legIdx == 2);
                 
                 double local_phase = gait_phase;
-                if (is_group_b) {
+                if (swing_fraction <= .25)
+                {
+                    if (legIdx == 0) local_phase += 0.00;
+                    if (legIdx == 3) local_phase += 0.25;
+                    if (legIdx == 1) local_phase += 0.50;
+                    if (legIdx == 2) local_phase += 0.75;
+                } else if (is_group_b) {
                     local_phase += 0.5;
                 }
                 if (local_phase >= 1.0) {
