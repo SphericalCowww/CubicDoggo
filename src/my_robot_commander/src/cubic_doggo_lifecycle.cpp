@@ -280,11 +280,14 @@ private:
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     std::vector<moveit::core::RobotStatePtr> sineWalkGait_(double lift, double x_stride, double y_stride,
                                                            double x_shift=0.0, double y_shift=0.0)
+    // Note: full cycle makes 2 x stride
     {
-        std::vector<moveit::core::RobotStatePtr> gait_waypoints;
         constexpr int waypoint_count = 100;
+        const double  swing_fraction = 0.3;         // Note: 0.5 generate 2 phase gait
+
+        std::vector<moveit::core::RobotStatePtr> gait_waypoints;
         for (int wp = 0; wp < waypoint_count; wp++) {
-            double phase = (2.0*M_PI)*static_cast<double>(wp)/static_cast<double>(waypoint_count);
+            double gait_phase = static_cast<double>(wp)/static_cast<double>(waypoint_count);
             moveit::core::RobotStatePtr walk_state = std::make_shared<moveit::core::RobotState>(*last_walk_state_);
             for (std::size_t legIdx = 0; legIdx < legN; legIdx++) {
                 double target_x = home_x_[legIdx];
@@ -293,22 +296,35 @@ private:
                 bool is_group_a = (legIdx == 0 || legIdx == 3);
                 bool is_group_b = (legIdx == 1 || legIdx == 2);
                 
-                double local_phase = phase;
+                double local_phase = gait_phase;
                 if (is_group_b) {
-                    local_phase += M_PI;
+                    local_phase += 0.5;
                 }
-                while (local_phase >= 2.0*M_PI) {
-                    local_phase -= 2.0*M_PI;
+                if (local_phase >= 1.0) {
+                    local_phase -= 1.0;
                 }
 
-                double x_offset = x_stride*std::sin(local_phase) + x_shift;
-                double y_offset = y_stride*std::sin(local_phase) + y_shift;
+                double x_offset = 0.0;
+                double y_offset = 0.0;
                 double z_offset = 0.0;
-                if (std::cos(local_phase) > 0.0) {
-                    z_offset = lift*std::cos(local_phase);
+                if (local_phase < swing_fraction) {
+                    double swing_progress = local_phase/swing_fraction; 
+                    z_offset =  lift    *std::sin(swing_progress*M_PI);
+                    if (swing_fraction >= 0.5) {
+                        x_offset = -x_stride + 2.0*x_stride*swing_progress;
+                        y_offset = -y_stride + 2.0*y_stride*swing_progress;
+                    } else {
+                        x_offset = -x_stride*std::cos(swing_progress*M_PI);
+                        y_offset = -y_stride*std::cos(swing_progress*M_PI);
+                    }
+                } else {
+                    double stance_progress = (local_phase - swing_fraction)/(1.0 - swing_fraction);
+                    z_offset = 0.0; 
+                    x_offset = x_stride - 2.0*x_stride*stance_progress;
+                    y_offset = y_stride - 2.0*y_stride*stance_progress;
                 }
-                target_x += x_offset;
-                target_y += y_offset;
+                target_x += (x_offset + x_shift);
+                target_y += (y_offset + y_shift);
                 target_z -= z_offset;
 
                 geometry_msgs::msg::Pose leg_pose = endEffector_pose_[legIdx].pose;
@@ -353,8 +369,8 @@ private:
     }
     void walkingLoop_() {
         double waypoint_dt = 0.01; // 10ms per point
+        double lift, x_stride, y_stride = 0.02, 0.0, 0.025;
         double maxVelScale = 1.0, maxAccScale = 1.0;
-        //double maxVelScale = 0.2, maxAccScale = 0.5, maxJrkScale = 0.05;
          
         all_legs_robot_model_ = all_legs_interface_->getRobotModel();
         auto joint_model_group = all_legs_robot_model_->getJointModelGroup(all_legs_planning_group_);
@@ -377,8 +393,8 @@ private:
                 }
                 RCLCPP_INFO(get_logger(), "CubicDoggoLifecycleManager:walkingLoop_(): home positions captured.");
             }
-           
-            std::vector<moveit::core::RobotStatePtr> gait_waypoints = sineWalkGait_(0.03, 0.0, 0.03);
+             
+            std::vector<moveit::core::RobotStatePtr> gait_waypoints = sineWalkGait_(lift, x_stride, y_stride);
             
             trajectory_msgs::msg::JointTrajectory traj_msg;
             traj_msg.joint_names = joint_names;
