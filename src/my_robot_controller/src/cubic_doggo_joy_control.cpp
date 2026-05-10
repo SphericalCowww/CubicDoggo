@@ -1,9 +1,11 @@
 #include <memory>
+#include <cmath>
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/joy.hpp"
 #include "example_interfaces/msg/string.hpp"
 #include "std_srvs/srv/set_bool.hpp"
-
+#include "my_robot_interface/msg/cubic_doggo_leg_feet_target.hpp"
+using custom_feet_array = my_robot_interface::msg::CubicDoggoLegFeetTarget;
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 class CubicDoggoJoyControl : public rclcpp::Node {
 public:
@@ -16,6 +18,7 @@ public:
         );
         command_pub_ = this->create_publisher<example_interfaces::msg::String>("/leg_set_named", 10);
         walk_client_ = this->create_client<std_srvs::srv::SetBool>            ("/leg_walk_toggle");
+        feet_pub_    = this->create_publisher<custom_feet_array>              ("/leg_set_feet", 10);
         RCLCPP_INFO(this->get_logger(), "CubicDoggoJoyControl:constructor()"
                                         "controller node started, listening on /joy...");
     }
@@ -40,7 +43,7 @@ private:
             }
         }
         prev_buttons_ = msg->buttons;
-
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////////
         if (prev_axes_.size() != msg->axes.size()) {
             prev_axes_.resize(msg->axes.size(), 0);
         }
@@ -52,6 +55,16 @@ private:
                 call_walk_(false);
             }
         }
+        if (msg->axes.size() > 3) {
+            auto feet_msg = custom_feet_array();
+            double deadzone = 0.05;
+            double raw_y =  msg->axes[1];
+            double raw_x = -msg->axes[3];
+            feet_msg.y = (std::abs(raw_y) > deadzone) ? raw_y : 0.0;
+            feet_msg.x = (std::abs(raw_x) > deadzone) ? raw_x : 0.0;
+            feet_pub_->publish(feet_msg);
+        }
+
         prev_axes_ = msg->axes;
     }
     void send_pose_(std::string pose_name) {
@@ -74,9 +87,10 @@ private:
                                         walk_state_str.c_str());
     }
 
-    rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr joy_subscriber_;
+    rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr        joy_subscriber_;
     rclcpp::Publisher<example_interfaces::msg::String>::SharedPtr command_pub_;
-    rclcpp::Client<std_srvs::srv::SetBool>::SharedPtr walk_client_;
+    rclcpp::Publisher<custom_feet_array>::SharedPtr               feet_pub_;
+    rclcpp::Client<std_srvs::srv::SetBool>::SharedPtr             walk_client_;
     std::vector<int>   prev_buttons_;
     std::vector<float> prev_axes_;
 };

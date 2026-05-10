@@ -32,10 +32,12 @@ using namespace std::placeholders;                  // for using _1, _2
 #include <example_interfaces/msg/float64_multi_array.hpp>    //variable size
 #include "my_robot_interface/msg/cubic_doggo_leg_pose_target.hpp"
 #include <example_interfaces/msg/bool.hpp>
-using ros_string   = example_interfaces::msg::String;
-using ros_array    = example_interfaces::msg::Float64MultiArray;
-using custom_array = my_robot_interface::msg::CubicDoggoLegPoseTarget;
-using ros_bool     = example_interfaces::msg::Bool;
+#include "my_robot_interface/msg/cubic_doggo_leg_feet_target.hpp"
+using ros_string        = example_interfaces::msg::String;
+using ros_array         = example_interfaces::msg::Float64MultiArray;
+using custom_pose_array = my_robot_interface::msg::CubicDoggoLegPoseTarget;
+using ros_bool          = example_interfaces::msg::Bool;
+using custom_feet_array = my_robot_interface::msg::CubicDoggoLegFeetTarget;
 
 const double DEFAULT_VEL_SCALE = 0.2;
 const double DEFAULT_ACC_SCALE = 0.05;
@@ -131,8 +133,10 @@ public:
             std::bind(&CubicDoggoLifecycleManager::legNamedCallback_, this, _1), sub_options);
         leg_joint_subscriber_ = create_subscription<ros_array>   ("/leg_set_joint", 10,
             std::bind(&CubicDoggoLifecycleManager::legJointCallback_, this, _1), sub_options);
-        leg_pose_subscriber_  = create_subscription<custom_array>("/leg_set_pose",  10,
+        leg_pose_subscriber_  = create_subscription<custom_pose_array>("/leg_set_pose",  10,
             std::bind(&CubicDoggoLifecycleManager::legPoseCallback_,  this, _1), sub_options);
+        leg_feet_subscriber_  = create_subscription<custom_feet_array>("/leg_set_feet",  10,
+            std::bind(&CubicDoggoLifecycleManager::legFeetCallback_,  this, _1), sub_options);
 
         keep_running_thread_ = true;
         is_walking_          = false; 
@@ -220,10 +224,27 @@ private:
         }
         legJointTarget_(msg->data);
     }
-    void legPoseCallback_(const custom_array::SharedPtr msg) {
+    void legPoseCallback_(const custom_pose_array::SharedPtr msg) {
         RCLCPP_INFO(get_logger(), "CubicDoggoLifecycleManager:legPoseCallback(): command received");
         setDefaultVelAccScaler_(DEFAULT_VEL_SCALE, DEFAULT_ACC_SCALE);
         legPoseTarget_(msg->leg_index, msg->x, msg->y, msg->z);
+    }
+    void legFeetCallback_(const custom_feet_array::SharedPtr msg) {
+        RCLCPP_INFO(get_logger(), "CubicDoggoLifecycleManager:legFeetCallback(): command received");
+        if (msg->x < -1.0) {
+            target_x_stride_ = -1.0;
+        } else if (1.0 < msg->x) {
+            target_x_stride_ = 1.0;
+        } else {
+            target_x_stride_ = msg->x;
+        }
+        if (msg->y < -0.5) {
+            target_y_stride_ = -0.5;
+        } else if (1.0 < msg->y) {
+            target_y_stride_ = 1.0;
+        } else {
+            target_y_stride_ = msg->y;
+        }
     }
     ///////////
     void legNamedTarget_(const std::string &name) {
@@ -265,25 +286,24 @@ private:
         legJointTarget_(leg_joints);
             
         loadCurrentRobotState_(legIdx);
-        to_target_dist = std::sqrt(std::pow(endEffector_x_[legIdx] - x, 2) + 
-                                   std::pow(endEffector_y_[legIdx] - y, 2) +
-                                   std::pow(endEffector_z_[legIdx] - z, 2));
-        if (to_target_dist > to_target_dist_thres) {
+        to_target_dist_ = std::sqrt(std::pow(endEffector_x_[legIdx] - x, 2) + 
+                                    std::pow(endEffector_y_[legIdx] - y, 2) +
+                                    std::pow(endEffector_z_[legIdx] - z, 2));
+        if (to_target_dist_ > to_target_dist_thres_) {
             RCLCPP_WARN(get_logger(), "CubicDoggoLifecycleManager:legPoseTarget_(): "
                                       "target unreachable (likely hit a joint limit). Settled %f meters away.", 
-                                      to_target_dist);
+                                      to_target_dist_);
         }
         RCLCPP_INFO(get_logger(), "CubicDoggoLifecycleManager:legSetPoseTarget_(): "
                                   "current end effector (i, x, y, z) = (%zu, %lf, %lf, %lf)",
                     legIdx, endEffector_x_[legIdx], endEffector_y_[legIdx], endEffector_z_[legIdx]);    
     }
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    std::vector<moveit::core::RobotStatePtr> sineWalkGait_(double lift, double x_stride, double y_stride,
-                                                           double x_shift=0.0, double y_shift=0.0)
+    std::vector<moveit::core::RobotStatePtr> sineWalkGait_(double swing_fraction, double lift, double x_stride, 
+                                                           double y_stride, double x_shift=0.0, double y_shift=0.0)
     // Note: full cycle makes 2 x stride
     {
         constexpr int waypoint_count = 100;
-        const double  swing_fraction = 0.5;         // Note: 0.5 generate 2 phase gait
 
         std::vector<moveit::core::RobotStatePtr> gait_waypoints;
         for (int wp = 0; wp < waypoint_count; wp++) {
@@ -295,7 +315,7 @@ private:
                 double target_z = home_z_[legIdx];
                 bool is_group_a = (legIdx == 0 || legIdx == 3);
                 bool is_group_b = (legIdx == 1 || legIdx == 2);
-                
+                bool is_group_backLeg = (legIdx == 2 || legIdx == 3);
                 double local_phase = gait_phase;
                 if (swing_fraction <= .25)
                 {
@@ -310,12 +330,10 @@ private:
                     local_phase -= 1.0;
                 }
 
-                double x_offset = 0.0;
-                double y_offset = 0.0;
-                double z_offset = 0.0;
+                double x_offset = 0.0, y_offset = 0.0, z_offset = 0.0;
                 if (local_phase < swing_fraction) {
                     double swing_progress = local_phase/swing_fraction; 
-                    z_offset =  lift    *std::sin(swing_progress*M_PI);
+                    z_offset = lift*std::sin(swing_progress*M_PI);
                     if (swing_fraction >= 0.5) {
                         x_offset = -x_stride + 2.0*x_stride*swing_progress;
                         y_offset = -y_stride + 2.0*y_stride*swing_progress;
@@ -329,7 +347,11 @@ private:
                     x_offset = x_stride - 2.0*x_stride*stance_progress;
                     y_offset = y_stride - 2.0*y_stride*stance_progress;
                 }
-                target_x += (x_offset + x_shift);
+                if (is_group_backLeg == true) {
+                    target_x -= (x_offset + x_shift);
+                } else {
+                    target_x += (x_offset + x_shift);
+                }
                 target_y += (y_offset + y_shift);
                 target_z -= z_offset;
 
@@ -375,15 +397,18 @@ private:
     }
     void walkingLoop_() {
         double maxVelScale = 1.0, maxAccScale = 1.0;
-        double waypoint_dt = 0.01; // 10ms per point
-        double lift = 0.02, x_stride = 0.0, y_stride = 0.025;
-         
+        double waypoint_dt    = 0.01;        // Note: 10ms per point
+        double swing_fraction = 0.5;         // Note: < 0.25 < stable trot < 0.5 < trot
+        double lift = 0.02, x_stride_max = 0.005, y_stride_max = 0.025, x_shift = 0.0, y_shift = 0.0;
+        double x_stride = 0.0, y_stride = 0.0;
+
         all_legs_robot_model_ = all_legs_interface_->getRobotModel();
         auto joint_model_group = all_legs_robot_model_->getJointModelGroup(all_legs_planning_group_);
         std::vector<std::string> joint_names = joint_model_group->getActiveJointModelNames();
     
         while (keep_running_thread_ && rclcpp::ok()) {
             if (is_walking_ == false) {
+                x_stride = 0.0, y_stride = 0.0;
                 walking_initialized_ = false;
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
                 continue;
@@ -399,8 +424,10 @@ private:
                 }
                 RCLCPP_INFO(get_logger(), "CubicDoggoLifecycleManager:walkingLoop_(): home positions captured.");
             }
-             
-            std::vector<moveit::core::RobotStatePtr> gait_waypoints = sineWalkGait_(lift, x_stride, y_stride);
+            x_stride = target_x_stride_*x_stride_max;
+            y_stride = target_y_stride_*y_stride_max;
+            std::vector<moveit::core::RobotStatePtr> gait_waypoints = sineWalkGait_(
+                swing_fraction, lift, x_stride, y_stride, x_shift, y_shift);
             
             trajectory_msgs::msg::JointTrajectory traj_msg;
             traj_msg.joint_names = joint_names;
@@ -509,9 +536,10 @@ private:
     rclcpp::CallbackGroup::SharedPtr callback_group_;
     rclcpp::Subscription<ros_string>  ::SharedPtr leg_named_subscriber_;
     rclcpp::Subscription<ros_array>   ::SharedPtr leg_joint_subscriber_;
-    rclcpp::Subscription<custom_array>::SharedPtr leg_pose_subscriber_;
-    double to_target_dist       = 0;
-    double to_target_dist_thres = 0.01;
+    rclcpp::Subscription<custom_pose_array>::SharedPtr leg_pose_subscriber_;
+    rclcpp::Subscription<custom_feet_array>::SharedPtr leg_feet_subscriber_;
+    std::atomic<double> to_target_dist_{0.0};
+    std::atomic<double> to_target_dist_thres_{0.01};
 
     rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr state_service_;
     rclcpp::Service<std_srvs::srv::SetBool>::SharedPtr walk_service_; 
@@ -521,10 +549,11 @@ private:
     std::atomic<bool> keep_running_thread_{false};
     std::thread walking_thread_;
     std::array<double, legN> home_x_, home_y_, home_z_;
-    moveit::core::RobotModelConstPtr all_legs_robot_model_;
-    rclcpp_action::Client<ExecuteTrajectory>::SharedPtr exec_action_client_;
-
+    std::atomic<double> target_x_stride_{0.0};
+    std::atomic<double> target_y_stride_{0.0};
+    moveit::core::RobotModelConstPtr                                    all_legs_robot_model_;
     rclcpp::Publisher<trajectory_msgs::msg::JointTrajectory>::SharedPtr joint_publisher_;
+    rclcpp_action::Client<ExecuteTrajectory>::SharedPtr                 exec_action_client_;
 };
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 int main(int argc, char **argv) {
