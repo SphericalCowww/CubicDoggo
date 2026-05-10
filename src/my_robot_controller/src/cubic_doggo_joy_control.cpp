@@ -54,11 +54,11 @@ private:
             if (msg->axes[7] < -0.5 && prev_axes_[7] >= -0.5) {
                 call_walk_(false);
             }
-            
+           
+            double deadzone = 0.05; 
             auto feet_msg = custom_feet_array();
-            double deadzone = 0.05;
-            double raw_x = -msg->axes[3];  
-            double raw_y =  msg->axes[4];
+            double raw_x = msg->axes[3];  
+            double raw_y = msg->axes[4];
             feet_msg.x = (std::abs(raw_x) > deadzone) ? raw_x : 0.0;
             feet_msg.y = (std::abs(raw_y) > deadzone) ? raw_y : 0.0;
             feet_pub_->publish(feet_msg);
