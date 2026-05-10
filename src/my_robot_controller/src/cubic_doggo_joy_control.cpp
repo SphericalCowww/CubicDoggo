@@ -3,8 +3,8 @@
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/joy.hpp"
 #include "example_interfaces/msg/string.hpp"
-#include "std_srvs/srv/set_bool.hpp"
 #include "my_robot_interface/msg/cubic_doggo_leg_feet_target.hpp"
+#include "std_srvs/srv/set_bool.hpp"
 using custom_feet_array = my_robot_interface::msg::CubicDoggoLegFeetTarget;
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 class CubicDoggoJoyControl : public rclcpp::Node {
@@ -54,14 +54,13 @@ private:
             if (msg->axes[7] < -0.5 && prev_axes_[7] >= -0.5) {
                 call_walk_(false);
             }
-        }
-        if (msg->axes.size() > 3) {
+            
             auto feet_msg = custom_feet_array();
             double deadzone = 0.05;
-            double raw_y =  msg->axes[1];
-            double raw_x = -msg->axes[3];
-            feet_msg.y = (std::abs(raw_y) > deadzone) ? raw_y : 0.0;
+            double raw_x = -msg->axes[3];  
+            double raw_y =  msg->axes[4];
             feet_msg.x = (std::abs(raw_x) > deadzone) ? raw_x : 0.0;
+            feet_msg.y = (std::abs(raw_y) > deadzone) ? raw_y : 0.0;
             feet_pub_->publish(feet_msg);
         }
 

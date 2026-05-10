@@ -31,13 +31,13 @@ using namespace std::placeholders;                  // for using _1, _2
 #include <example_interfaces/msg/string.hpp>
 #include <example_interfaces/msg/float64_multi_array.hpp>    //variable size
 #include "my_robot_interface/msg/cubic_doggo_leg_pose_target.hpp"
-#include <example_interfaces/msg/bool.hpp>
 #include "my_robot_interface/msg/cubic_doggo_leg_feet_target.hpp"
+#include <example_interfaces/msg/bool.hpp>
 using ros_string        = example_interfaces::msg::String;
 using ros_array         = example_interfaces::msg::Float64MultiArray;
 using custom_pose_array = my_robot_interface::msg::CubicDoggoLegPoseTarget;
-using ros_bool          = example_interfaces::msg::Bool;
 using custom_feet_array = my_robot_interface::msg::CubicDoggoLegFeetTarget;
+using ros_bool          = example_interfaces::msg::Bool;
 
 const double DEFAULT_VEL_SCALE = 0.2;
 const double DEFAULT_ACC_SCALE = 0.05;
@@ -230,20 +230,23 @@ private:
         legPoseTarget_(msg->leg_index, msg->x, msg->y, msg->z);
     }
     void legFeetCallback_(const custom_feet_array::SharedPtr msg) {
-        RCLCPP_INFO(get_logger(), "CubicDoggoLifecycleManager:legFeetCallback(): command received");
-        if (msg->x < -1.0) {
-            target_x_stride_ = -1.0;
-        } else if (1.0 < msg->x) {
-            target_x_stride_ = 1.0;
-        } else {
-            target_x_stride_ = msg->x;
-        }
-        if (msg->y < -0.5) {
-            target_y_stride_ = -0.5;
-        } else if (1.0 < msg->y) {
-            target_y_stride_ = 1.0;
-        } else {
-            target_y_stride_ = msg->y;
+        if ((msg->x != target_x_stride_) || ((msg->y != target_y_stride_))) {
+            RCLCPP_INFO(get_logger(), "CubicDoggoLifecycleManager:legFeetCallback(): command received, "
+                                      "(x, y) = (%lf, %lf)", msg->x, msg->y);
+            if (msg->x < -1.0) {
+                target_x_stride_ = -1.0;
+            } else if (1.0 < msg->x) {
+                target_x_stride_ = 1.0;
+            } else {
+                target_x_stride_ = msg->x;
+            }
+            if (msg->y < -0.5) {
+                target_y_stride_ = -0.5;
+            } else if (1.0 < msg->y) {
+                target_y_stride_ = 1.0;
+            } else {
+                target_y_stride_ = msg->y;
+            }
         }
     }
     ///////////
@@ -289,22 +292,21 @@ private:
         to_target_dist_ = std::sqrt(std::pow(endEffector_x_[legIdx] - x, 2) + 
                                     std::pow(endEffector_y_[legIdx] - y, 2) +
                                     std::pow(endEffector_z_[legIdx] - z, 2));
-        if (to_target_dist_ > to_target_dist_thres_) {
+        if (to_target_dist_.load() > to_target_dist_thres_.load()) {
             RCLCPP_WARN(get_logger(), "CubicDoggoLifecycleManager:legPoseTarget_(): "
                                       "target unreachable (likely hit a joint limit). Settled %f meters away.", 
-                                      to_target_dist_);
+                                      to_target_dist_.load());
         }
         RCLCPP_INFO(get_logger(), "CubicDoggoLifecycleManager:legSetPoseTarget_(): "
                                   "current end effector (i, x, y, z) = (%zu, %lf, %lf, %lf)",
                     legIdx, endEffector_x_[legIdx], endEffector_y_[legIdx], endEffector_z_[legIdx]);    
     }
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    std::vector<moveit::core::RobotStatePtr> sineWalkGait_(double swing_fraction, double lift, double x_stride, 
-                                                           double y_stride, double x_shift=0.0, double y_shift=0.0)
+    std::vector<moveit::core::RobotStatePtr> sineWalkGait_(int waypoint_count, double swing_fraction, 
+                                                           double lift, double x_stride, double y_stride, 
+                                                           double x_shift=0.0, double y_shift=0.0)
     // Note: full cycle makes 2 x stride
     {
-        constexpr int waypoint_count = 100;
-
         std::vector<moveit::core::RobotStatePtr> gait_waypoints;
         for (int wp = 0; wp < waypoint_count; wp++) {
             double gait_phase = static_cast<double>(wp)/static_cast<double>(waypoint_count);
@@ -313,11 +315,11 @@ private:
                 double target_x = home_x_[legIdx];
                 double target_y = home_y_[legIdx];
                 double target_z = home_z_[legIdx];
-                bool is_group_a = (legIdx == 0 || legIdx == 3);
-                bool is_group_b = (legIdx == 1 || legIdx == 2);
+                bool is_group_a = ((legIdx == 0) || (legIdx == 3));
+                bool is_group_b = ((legIdx == 1) || (legIdx == 2));
                 bool is_group_backLeg = (legIdx == 2 || legIdx == 3);
                 double local_phase = gait_phase;
-                if (swing_fraction <= .25)
+                if (swing_fraction <= 0.25)
                 {
                     if (legIdx == 0) local_phase += 0.00;
                     if (legIdx == 3) local_phase += 0.25;
@@ -397,9 +399,11 @@ private:
     }
     void walkingLoop_() {
         double maxVelScale = 1.0, maxAccScale = 1.0;
-        double waypoint_dt    = 0.01;        // Note: 10ms per point
-        double swing_fraction = 0.5;         // Note: < 0.25 < stable trot < 0.5 < trot
-        double lift = 0.02, x_stride_max = 0.005, y_stride_max = 0.025, x_shift = 0.0, y_shift = 0.0;
+        int    waypoint_N     = 100;       // number of waypoints for each cycle,      default 100
+        double waypoint_dt    = 0.01;      // second for each waypoint,                default 0.01
+        double IK_bufferTime  = 0.10;      // time at end of cycle buffer for IK calc, default 0.10
+        double swing_fraction = 0.50;      // creep < 0.25 < stable trot < 0.5 < trot
+        double lift = 0.02, x_stride_max = 0.01, y_stride_max = 0.025, x_shift = 0.0, y_shift = 0.0;
         double x_stride = 0.0, y_stride = 0.0;
 
         all_legs_robot_model_ = all_legs_interface_->getRobotModel();
@@ -424,28 +428,39 @@ private:
                 }
                 RCLCPP_INFO(get_logger(), "CubicDoggoLifecycleManager:walkingLoop_(): home positions captured.");
             }
+            
             x_stride = target_x_stride_*x_stride_max;
             y_stride = target_y_stride_*y_stride_max;
             std::vector<moveit::core::RobotStatePtr> gait_waypoints = sineWalkGait_(
-                swing_fraction, lift, x_stride, y_stride, x_shift, y_shift);
-            
+                waypoint_N, swing_fraction, lift, x_stride, y_stride, x_shift, y_shift);
+            if (gait_waypoints.empty()) {
+                RCLCPP_WARN(get_logger(), "CubicDoggoLifecycleManager:walkingLoop_(): "
+                                          "gait IK failed; skipping this cycle");
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                continue;
+            }            
+
             trajectory_msgs::msg::JointTrajectory traj_msg;
             traj_msg.joint_names = joint_names;
-            traj_msg.header.stamp = this->now(); 
+            traj_msg.header.stamp = rclcpp::Time(0, 0, this->get_clock()->get_clock_type());
 
             for (size_t way_idx = 0; way_idx < gait_waypoints.size(); way_idx++) {
                 trajectory_msgs::msg::JointTrajectoryPoint joint_traj_pt;
                 std::vector<double> positions;
                 gait_waypoints[way_idx]->copyJointGroupPositions(joint_model_group, positions);
                 joint_traj_pt.positions = positions;
-                joint_traj_pt.time_from_start = rclcpp::Duration::from_seconds((way_idx + 1) * waypoint_dt);
+                joint_traj_pt.time_from_start = rclcpp::Duration::from_seconds((way_idx + 1)*waypoint_dt);
                 traj_msg.points.push_back(joint_traj_pt);
             }
 
             joint_publisher_->publish(traj_msg);
 
-            double cycle_duration = gait_waypoints.size() * waypoint_dt;
-            std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(cycle_duration * 800)));
+            double cycle_duration_ms = (gait_waypoints.size()*waypoint_dt - IK_bufferTime)*1000;
+            if (cycle_duration_ms <= 0) {
+                RCLCPP_ERROR(get_logger(), "CubicDoggoLifecycleManager:walkingLoop_(): "
+                                           "negative cycle duration, waypoint_N*waypoint_dt < IK_befferTime");
+            }
+            std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(cycle_duration_ms)));
 
             if (walking_initialized_ == false) {
                 walking_initialized_ = true;
