@@ -1,10 +1,29 @@
-# Developing a 12-DOF 4-Legged Robot
+# Maker-Built 12-DOF 4-Legged Robot
 
 Derivation of the <a href="https://github.com/SphericalCowww/ROS_leggedRobot_testBed">GitHub Repository</a>:
 
 <img src="https://github.com/SphericalCowww/ROS_Cubic_Doggo/blob/main/CubicDoggo.png" width="300">
 
 Goal 1: Resolving the walking gait. The current walking gait (<a href="https://www.reddit.com/r/robotics/comments/1rouerc/first_time_building_a_hobbyist_robot_from_scratch/">link</a>) is already showing the problem of not being able to lift the feet in action. Perhaps this can be resolved by gait optimization, but it can also be limited intrinsic motor speed, maximum current from the batteries, the feet being too heavy, or just not having enough friction on the feet.
+
+# Design philosophy and requirements
+
+- full <a href="https://github.com/SphericalCowww/CubicDoggo/tree/main/src/my_robot_description/mesh/CADv1">3D-printed</a>/commertial parts, no machine shop required, no specialized 3D-printer, no custom PCBs, no special motors
+- all open source software, ROS2/MoveIt2, and FreeCAD/Cura
+- modulo for building from the ground up
+- no gears and avoiding tiny parts unless required by the servos/electronics. All nuts aiming for 3M
+- 2 locations require soldering, however
+- "Cubic" for minimalistic 3D design
+- all servos are the same for simplicity
+- exposed electronics for incorporating any future add-ons
+
+# Running a single servo on ROS2
+
+# Running a single leg on ROS2
+
+# Running peripherals
+
+# Running full robot
 
 ## Hardware Connections
 
