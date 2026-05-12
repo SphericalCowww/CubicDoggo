@@ -18,7 +18,7 @@ All software used is open source, including FreeCAD/Cura and Ubuntu/ROS2/MoveIt2
 
 The recipe should cover the construction from the ground up, since that is also how I get to know how to build, while skipping all the mistakes made (check <a href="https://github.com/SphericalCowww/ROS_leggedRobot_testBed">GitHub</a> for all previous tests). Hopefully, the document is as modular as possible, so that it can be started and debugged step by step. For software, all the key parameters will be recorded, but will rely on the ROS structure to explain the rest. I am a hobbyist after all, not a robotics expert, so I ain't explaining what IK or IMU are, since I learn them the same way all non-experts do, by checking them out on Youtube. Nevertheless, this also means you don't need to be an expert to build this Cubic Doggo.
 
-# Requirements
+# Ingredients
 
 ## Special soldering requirements
 
