@@ -355,8 +355,6 @@ For the low rasp pi power alarm, it's set by the rasp_pi_peripheral_node:
     # journalctl -u robot_startup.service -n 100 > start_robot_output.txt      # to check the output
     # journalctl -u robot_startup.service -f
 
-# Running a single servo on ROS2
-
 # Future development directions
 
 - Cubic Doggo MKII: strengthen the 2nd servo holding design, use PLA+, use STS-3215 (high torque, cheaper, but harder to develop)
