@@ -1,6 +1,8 @@
-# Homemade 12-DOF 4-Legged Robot Recipe
+# Cubic Doggo: Homemade 12-DOF 4-Legged Robot Recipe
 
-<img src="https://github.com/SphericalCowww/ROS_Cubic_Doggo/blob/main/CubicDoggo.png" width="300">
+**Walking robot dog with all commercial/3D-printed parts!**
+
+<img src="https://github.com/SphericalCowww/ROS_Cubic_Doggo/blob/main/CubicDoggo.png" width="300"> 
 
 Derived from: <a href="https://github.com/SphericalCowww/ROS_leggedRobot_testBed">GitHub</a>/<a href="https://www.reddit.com/r/robotics/comments/1rouerc/first_time_building_a_hobbyist_robot_from_scratch/">Reddit</a>
 
@@ -10,17 +12,18 @@ Upgraded the walk gait: <a href="https://www.reddit.com/r/ROS/comments/1t8g1my/c
 
 All the CAD models can be found here: <a href="https://github.com/SphericalCowww/CubicDoggo/tree/main/src/my_robot_description/mesh/CADv1">link</a>
 
-# General
+This is a project developed by a complete hobbyist at home with only commercial/3D-printed parts: no CNC machining, no custom PCBs, and no special motors needed. Moreover, to keep things simple, only 1 type of motor is used. No gears, no tiny delicate parts, and keeping all screw size M3 unless required by the commercial parts. There are, however, two occasions that require soldering, one is a Y wire for the DYNAMIXEL servo controller, while the other is an optional capacitor to ground link. The electronics are exposed for easy future addons, and yes, the LIDAR is currently just used as a counter-weight.
 
-This is a project that 
+All software used is open source, including FreeCAD/Cura and Ubuntu/ROS2/MoveIt2. "Cubic" is also regarding the minimalistic CAD design, easy to draw, and easy to print. And yes, I am too lazy to do fillets; FreeCAD will drive you nuts if you try to reapply this after any tiny changes. Note that every CAD piece has an orientation that is easy to print, though. Coding-wise, I only add comments on special occasions, but I describe parameter names and order the code mostly to be read from top-to-bottom. I try to follow as much standard structure from ROS (see, for example, a <a href="https://github.com/SphericalCowww/ROS_init_practice/tree/main/ros2_ws3_interface">lifecycle</a>).
 
-- full <a href="https://github.com/SphericalCowww/CubicDoggo/tree/main/src/my_robot_description/mesh/CADv1">3D-printed</a>/commertial parts, no machine shop required, no specialized 3D-printer, no custom PCBs, no special motors
-- all open source software, ROS2/MoveIt2, and FreeCAD/Cura
+The recipe should cover the construction from the ground up, since that is also how I get to know how to build, while skipping all the mistakes made. Hopefully, the document is as modular as possible, so that it can be started and debugged step by step. For software, all the key parameters will be recorded, but will rely on the ROS structure to explain the rest. I am a hobbyist after all, not a robotics expert, so I ain't explaining what IK or IMU are, since I learn them the same way all non-experts do, by checking them out on Youtube. Nevertheless, this also means you don't need to be an expert to build this Cubic Doggo.
+
+# Requirements
+
+## Special soldering requirements
+
 - modulo for building from the ground up
 - no gears and avoiding tiny parts unless required by the servos/electronics. All nuts aiming for 3M
-- 2 locations require soldering, however
-- "Cubic" for minimalistic 3D design
-- all servos are the same for simplicity
 - exposed electronics for incorporating any future add-ons
 
 ## Hardware Requirements
