@@ -54,7 +54,245 @@ The recipe should cover the construction from the ground up, since that is also 
 
 # Running a single servo on ROS2
 
+### setting the servo IDs
+
+Connecting servo to U2D2 according to <a href="https://www.youtube.com/watch?v=FIj_NULYOKQ">YouTube</a>:
+
+<img src="https://github.com/SphericalCowww/ROS_leggedRobot_testBed/blob/main/basicConnection_DYNAMIXEL.png" width="200">
+
+Use the following App <a href="https://emanual.robotis.com/docs/en/software/dynamixel/dynamixel_wizard2/">DYNAMIXEL Wizard 2.0</a> to change the servo ID (default 1) to, say, ID 10. Note that if any of the servos have the same ID, they will NOT show up in the scan. The servos also all initially come with an ID of 1, so they must be connected one by one to U2D2 to change their IDs accordingly.
+
+    connect U2D2 to computer => open DYNAMIXEL Wizard 2.0
+    # Options 
+    ## Select protocol to scan => Protocol 2.0 (only)
+    ## Select port to scan => which ever port is connected
+    ## Select baudrate to scan => 57600 bps and 2000000bpt => OK
+    ## Select ID range to scan => End => 50
+    ## OK
+    # Scan
+    # Item 
+    ## (Address 7) ID => ID 11 (on the right) => Save (may need to scroll down) 
+    ## (Address 8) Baud Rate (Bus) => 2Mbps (on the right) => Save (may need to scroll down) 
+    ## (Address 9) Return Delay Time => 0 (on the right) => Save (may need to scroll down) 
+    ## (Address 68) Status Return Level => 2 (on the right) => Save (may need to scroll down) 
+
+Can also test out the servo:
+
+    # LED (top right toggle)
+    # Torque (top right toggle) => set the value for motion (can select Velocity/Position mode)
+
+## Installing the <a href="https://github.com/ROBOTIS-GIT/DynamixelSDK">dynamixel-sdk</a> and  <a href="https://github.com/ROBOTIS-GIT/dynamixel-workbench">dynamixel-workbench</a>
+
+Following <a href="https://github.com/SphericalCowww/ROS_init_practice">github</a> to install ROS. To install drivers for Dynamixel, 
+
+    sudo apt install ros-jazzy-dynamixel-sdk* ros-jazzy-dynamixel-hardware* ros-jazzy-dynamixel-workbench*
+    dpkg -l | grep dynamixel
+    ros2 pkg list | grep dynamixel
+
+Then copy <a href="https://github.com/ROBOTIS-GIT/dynamixel-workbench/tree/main/dynamixel_workbench_toolbox/examples/src">src</a> directly under ``/src/my_toolbox_dynamixel_workbench``. And for every ``.cpp`` file, change the following line:
+
+    #include <DynamixelWorkbench.h>
+
+To, 
+
+    #include <cstdlib>
+    #include "dynamixel_workbench_toolbox/dynamixel_workbench.h"
+
+Then ``cd ROS_leggedRobot_testBed`` and build,
+
+    colcon build
+    source install/setup.bash
+
+Connect U2D2 to Rasp Pi USB port. To check if ROS2 sees the servos: 
+
+    sudo dmesg | tail -n 20
+    # look for:
+    ## usb 2-2: Detected FT232H
+    ## usb 2-2: FTDI USB Serial Device converter now attached to ttyUSB0
+    ls -l /dev/ttyUSB*
+    sudo chmod a+rw /dev/ttyUSB0                   # required everytime after reconnection
+    ros2 run my_toolbox_dynamixel_workbench model_scan /dev/ttyUSB0 2000000
+    ros2 run my_toolbox_dynamixel_workbench position /dev/ttyUSB0 2000000 11 0.5
+
+Update USB port latency to 1 ms. Note that this USB signal is delicate; use as short and high-quality a USB cable as possible.: 
+
+    lsusb
+    # look for: Bus 002 Device 003: ID 0403:6014 Future Technology Devices International, Ltd FT232H Single HS USB-UART/FIFO IC
+    sudo vim /etc/udev/rules.d/99-dynamixel-latency.rules
+    ---------- add: 
+    SUBSYSTEM=="tty", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6014", ATTR{device/latency_timer}="1", SYMLINK+="ttyU2D2", MODE="0666", GROUP="dialout"
+    # ATTR{device/latency_timer}="1": Sets the 1ms latency (The "Sync Read" fix).
+    # SYMLINK+="ttyU2D2": (Optional but helpful) This creates a static name for your device. You can now use /dev/ttyU2D2 in your code instead of /dev/ttyUSB0, so it won't break if you plug in another USB device.
+    # MODE="0666": Allows your ROS node to access the port without needing sudo.
+    ---------- 
+    sudo vim /etc/udev/rules.d/99-ftdi.rules
+    ---------- add: 
+    SUBSYSTEM=="usb", ATTR{idVendor}=="0403", ATTR{idProduct}==6014, MODE="0666", GROUP="dialout"
+    SUBSYSTEM=="tty", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6014", MODE="0666", GROUP="dialout"
+    # This gives the correct permission to the USB port in question, otherwise, whenever reconnected, needs to do: sudo chmod a+rw /dev/ttyUSB0
+    ---------- 
+    sudo udevadm control --reload-rules
+    sudo udevadm trigger
+    ls -l /dev/ttyU2D2
+    # if doesn't exist, do: sudo apt remove brltty
+    cat /sys/class/tty/ttyUSB0/device/latency_timer
+    # which should show 1 for 1 ms
+
+Update to run the firmware with proper permissions to avoid latency:
+
+    # without sudo, we will see the following WARNING in ros2 launch:
+    ## [ros2_control_node-2] [WARN] [1766867979.090889912] [controller_manager]: Could not enable FIFO RT scheduling policy: with error number <1> (Operation not permitted). See [https://control.ros.org/master/doc/ros2_control/controller_manager/doc/userdoc.html] for details on how to enable realtime scheduling.
+    # with sudo, we can do the following:
+    ## sudo bash -c "source /opt/ros/jazzy/setup.bash; source install/setup.bash; ros2 launch my_robot_bringup my_robot.with_commander.launch.py"
+    # however, eventually we want to run without sudo in case it messes up with other permissions:
+    sudo addgroup realtime
+    sudo usermod -a -G realtime $USER
+    sudo vim /etc/security/limits.d/realtime.conf:
+    ----------  add:
+    @realtime soft rtprio 99
+    @realtime soft priority 99
+    @realtime soft memlock unlimited
+    @realtime hard rtprio 99
+    @realtime hard priority 99
+    @realtime hard memlock unlimited
+    ---------- 
+    sudo reboot
+    # 
+
+    ### testing the driver in ROS2
+
+    colcon build
+    source install/setup.bash
+    ros2 run my_robot_firmware testRaspPi5_dynamixel_u2d2_leg1swing_xl430
+    ps -ef | grep testRaspPi5_dynamixel_u2d2_leg1swing_xl430                 # to kill it before it ends
+    # only when dynamixels are not connected to into a leg: 
+    ## ros2 run my_robot_firmware testRaspPi5_dynamixel_u2d2_channel0_xl430 
+    ## ros2 run my_robot_firmware testRaspPi5_dynamixel_u2d2_leg1swipe_xl430
+
 # Running a single leg on ROS2
+
+### testing the driver in ROS2
+
+    colcon build
+    source install/setup.bash
+    ros2 run my_robot_firmware testRaspPi5_dynamixel_u2d2_leg1swing_xl430
+    ps -ef | grep testRaspPi5_dynamixel_u2d2_leg1swing_xl430                 # to kill it before it ends
+    # only when dynamixels are not connected to into a leg: 
+    ## ros2 run my_robot_firmware testRaspPi5_dynamixel_u2d2_channel0_xl430 
+    ## ros2 run my_robot_firmware testRaspPi5_dynamixel_u2d2_leg1swipe_xl430
+
+    ### testing the driver with ros2_control and MoveIt
+Under ``ma_robot.ros2_control.xacro``, switch ``<plugin>mock_components/GenericSystem</plugin-->`` to ``<plugin>ma_robot_namespace::HardwareInterfaceU2D2_ma_robot</plugin>``. The latter plugin type can be found at the bottom of ``src/my_robot_firmware/hardware_interface_ma_robot_dynamixel_u2d2_xl430.xml``. Then run the following:
+
+    colcon build
+    source install/setup.bash
+    ros2 launch my_robot_bringup ma_robot.with_commander.launch.py
+    ros2 topic info /arm_set_name
+    ros2 topic pub -1 /arm_set_named example_interfaces/msg/String "{data: "arm_pose1"}"
+    ros2 topic info /arm_set_joint
+    ros2 topic pub -1 /arm_set_joint example_interfaces/msg/Float64MultiArray "{data: [0.5, 0.5, 0.5, 0.5, 0.5, 0.5]}"
+    ros2 topic info /arm_set_pose
+    ros2 topic pub -1 /arm_set_pose my_robot_interface/msg/MaRobotArmPoseTarget "{x: 0.7, y: 0.0, z: 0.4, roll: 3.14, pitch: 0.0, yaw: 0.0, use_cartesian_path: false}"
+    ros2 topic info /gripper_set_open
+    ros2 topic pub -1 /gripper_set_open example_interfaces/msg/Bool "{data: false}"
+
+## Launch ROS2 interface with 1 leg
+
+### launch urdf
+
+Then run the following:
+
+    colcon build
+    source install/setup.bash
+    ros2 launch my_robot_description my_robot.rviz.launch.xacro.py
+    # if no config loaded
+    ## Fixed Frame: base_link
+    ## Add: RobotModel
+    ## RobotModel: Description Topic: /robot_description
+
+[Video demo](https://raw.githubusercontent.com/SphericalCowww/ROS_leggedRobot_testBed/main/rViz1Leg.mp4)
+
+### moveit2 setup assistance with a leg
+
+Launch the MoveIt assistance:
+
+    sudo apt update
+    sudo apt install
+    colcon build
+    source install/setup.bash
+    ros2 launch moveit_setup_assistant setup_assistant.launch.py
+    # Create New Moveit Configuration Package (or edit if the configuration files already exist)
+    # Browse => src/my_robot_description/urdf/my_robot.urdf.xacro => Load Files
+    # Start Screen: can toggle visual/collision
+    # Self-Collisions => Generate Collision Matrix: removes all never-in-contact and adjacent collisions
+    # Virtual Joints => Add Virtual Joint => Virtual Joint Name: virtual_joint => Parent Frame Name: world => Joint Type: fixed => Save
+    ## no need if already defined in urdf. Can always comment out afterwards in /src/my_robot_moveit_config/config/my_robot.srdf 
+    # Planning Groups => Add Group => Group Name: leg1 => Kinametic Solver: kdl_kinematics_plugin => Add Joints => 
+    ## choose with right arrow "servo1_servo1_padding", "servo2_servo2_padding", "servo3_calfFeet", and "calfFeet_calfSphere" => Save
+    # Robot Poses => Add Pose => all joints at 0 => Pose Name: home => Save: can add a few other ones for debugging
+    # ros2_control URDF Model => position for Command Interfaces and State Interfaces => Add interfaces
+    # ROS2 Controllers => Auto Add JointTrajectoryController
+    # Moveit Controllers => Auto Add FollowJointsTrajectory
+    # Author Information => add anything (e.g. "my_robot", "my_robot@gmail.com"), otherwise bugged
+    # Configuration Files => Browse: src/my_robot_moveit_config/ => Generate Package: double check if files are generated => Exit Setup Assistant
+
+Fix the following file:
+
+    # src/my_robot_moveit_config/config/joint_limits.yaml => max_velocity: 20.0, has_acceleration_limits: true, max_acceleration: 10.0 (need to be float)
+    # src/my_robot_moveit_config/config/moveit_controllers.yaml => add the following under leg1_controller: 
+    ## action_ns: follow_joint_trajectory
+    ## default: true
+    # src/my_robot_moveit_config/config/initial_positions.yaml => servo1_servo1_padding: 3.14, servo2_servo2_padding: 3.14, servo3_calfJoint: 3.14
+    # src/my_robot_moveit_config/config/my_robot.srdf => include only the following in <group name="leg1">:
+    ## <group name="leg1">
+    ##     <chain base_link="base_link" tip_link="calfSphere"/>
+    ## </group>
+    # src/my_robot_moveit_config/config/kinematics.yaml => replace with the following:
+    ##leg1:
+    ##  kinematics_solver: kdl_kinematics_plugin/KDLKinematicsPlugin
+    ##  kinematics_solver_search_resolution: 0.005
+    ##  kinematics_solver_timeout: 0.05
+    ##  kinematics_solver_attempts: 3
+    ##  position_only_ik: True        # this one is important because the leg does NOT care about the orientation of the end effector
+
+### launch the demo:
+
+    colcon build
+    source install/setup.bash
+    ros2 launch my_robot_moveit_config demo.launch.py
+    # ignore: [move_group-3] [ERROR] [1758361830.007872451] [move_group.moveit.moveit.ros.occupancy_map_monitor]: No 3D sensor plugin(s) defined for octomap updates
+    # ignore: [rviz2-4] [ERROR] [1758361834.128908606] [moveit_143394722.moveit.ros.motion_planning_frame]: Action server: /recognize_objects not available
+    # MotionPlanning:
+    ## Planning Group: leg1
+    ## Goal State: pose1
+    ## Plan
+    ## Execute
+
+Note that to move the motion wheel in rViz:
+
+    # toggle: Approx IK Soluations
+    # toggle if needed: MotionPlanning => Planned Path => Loop Animation
+    # toggle if needed: Use Cartesian Path 
+
+### launch with a proper launch file:
+
+    mv src/my_robot_moveit_config/config/ros2_controllers.yaml src/my_robot_bringup/config/my_robot_controllers.yaml
+    # change the following line if needed in my_robot_controllers.yaml
+    ## update_rate: 100 # Hz
+    mv src/my_robot_moveit_config/config/my_robot.ros2_control.xacro src/my_robot_description/urdf/
+    rm src/my_robot_moveit_config/config/my_robot.urdf.xacro
+    # modify the following line in my_robot.ros2_control.xacro:
+    ## remove: <xacro:property name="initial_positions" value="${xacro.load_yaml(initial_positions_file)['initial_positions']}"/>
+    ## for all servos, update to: <param name="initial_value">3.14</param> 
+    # adding the following line in my_robot.urdf.xacro:
+    ## <xacro:include filename="my_robot.ros2_control.xacro" />
+    colcon build
+    source install/setup.bash
+    ros2 launch my_robot_bringup my_robot.launch.py
+    # NOTE: Sometimes it takes a second try to have everything registered
+    # Add => MotionPlanning
+    ## Context => Planning Library => ompl
+    ## Planning => Goal State: pose1 => Plan => Execute
 
 # Running peripherals
 
