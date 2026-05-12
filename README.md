@@ -1,12 +1,18 @@
 # Homemade 12-DOF 4-Legged Robot Recipe
 
-Derivation of the <a href="https://github.com/SphericalCowww/ROS_leggedRobot_testBed">GitHub Repository</a>:
-
 <img src="https://github.com/SphericalCowww/ROS_Cubic_Doggo/blob/main/CubicDoggo.png" width="300">
 
-Goal 1: Resolving the walking gait. The current walking gait (<a href="https://www.reddit.com/r/robotics/comments/1rouerc/first_time_building_a_hobbyist_robot_from_scratch/">link</a>) is already showing the problem of not being able to lift the feet in action. Perhaps this can be resolved by gait optimization, but it can also be limited intrinsic motor speed, maximum current from the batteries, the feet being too heavy, or just not having enough friction on the feet.
+Derived from: <a href="https://github.com/SphericalCowww/ROS_leggedRobot_testBed">GitHub</a>/<a href="https://www.reddit.com/r/robotics/comments/1rouerc/first_time_building_a_hobbyist_robot_from_scratch/">Reddit</a>
 
-# Design philosophy and requirements
+Upgraded the center of mass: <a href="https://www.reddit.com/r/ROS/comments/1roiee3/i_built_a_4legged_12dof_robot_dog_using_ros_2_i/">Reddit</a>
+
+Upgraded the walk gait: <a href="https://www.reddit.com/r/ROS/comments/1t8g1my/cubic_doggo_update_phew_it_finally_walks_with/">Reddit</a>
+
+All the CAD models can be found here: <a href="https://github.com/SphericalCowww/CubicDoggo/tree/main/src/my_robot_description/mesh/CADv1">link</a>
+
+# General
+
+This is a project that 
 
 - full <a href="https://github.com/SphericalCowww/CubicDoggo/tree/main/src/my_robot_description/mesh/CADv1">3D-printed</a>/commertial parts, no machine shop required, no specialized 3D-printer, no custom PCBs, no special motors
 - all open source software, ROS2/MoveIt2, and FreeCAD/Cura
@@ -17,7 +23,7 @@ Goal 1: Resolving the walking gait. The current walking gait (<a href="https://w
 - all servos are the same for simplicity
 - exposed electronics for incorporating any future add-ons
 
-## Hardware Connections
+## Hardware Requirements
 
 | device | DYNAMIXEL models | number | specification |
 | - | - | - | - |
@@ -107,7 +113,15 @@ For the low rasp pi power alarm, it's set by the rasp_pi_peripheral_node:
     # sudo systemctl disable robot_startup.service                             # disable at reboot
     # journalctl -u robot_startup.service -n 100 > start_robot_output.txt      # to check the output
     # journalctl -u robot_startup.service -f
-    
 
+# Running a single servo on ROS2
 
+# Future development directions
 
+- Cubic Doggo MKII: strengthen the 2nd servo holding design, use PLA+, use STS-3215 (high torque, cheaper, but harder to develop)
+- Cubic Doggo <a href="https://github.com/chvmp/champ">CHAMP</a>: adapting IMU, and check the compatibility to the CHAMP framework
+- Cubic Doggo RL: walk gait trained by the RL using whatever open software available
+
+# Acknowledgement
+
+- Thank my second brother, who is a mechanical engineer, for advising me to use the locknuts, all-directional bearings, and battery for RC boats, as well as buying me a bunch of screws for cheap. But he also suggested me to use 100% 3D-filling with cavities to cut weight instead, which I followed only to a degree. Anyways, he doesn't have a GitHub account, so probably will never find out.
