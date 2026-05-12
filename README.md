@@ -1,4 +1,4 @@
-# Maker-Built 12-DOF 4-Legged Robot
+# Homemade 12-DOF 4-Legged Robot Recipe
 
 Derivation of the <a href="https://github.com/SphericalCowww/ROS_leggedRobot_testBed">GitHub Repository</a>:
 
@@ -16,14 +16,6 @@ Goal 1: Resolving the walking gait. The current walking gait (<a href="https://w
 - "Cubic" for minimalistic 3D design
 - all servos are the same for simplicity
 - exposed electronics for incorporating any future add-ons
-
-# Running a single servo on ROS2
-
-# Running a single leg on ROS2
-
-# Running peripherals
-
-# Running full robot
 
 ## Hardware Connections
 
@@ -50,6 +42,14 @@ Goal 1: Resolving the walking gait. The current walking gait (<a href="https://w
   * Powering the hubs using their SMPS DC jacks. Then use the molex/screw terminal as an output to power the Raspberry Pi 5 via a 12V-to-5V DC-DC converter.
 
 <img src="https://github.com/SphericalCowww/ROS_leggedRobot_testBed/blob/main/powerSystem.png" width="500"> <img src="https://github.com/SphericalCowww/ROS_leggedRobot_testBed/blob/main/powerSystemSharingGround.png" width="200"> 
+
+# Running a single servo on ROS2
+
+# Running a single leg on ROS2
+
+# Running peripherals
+
+# Running full robot
 
 ## Basic Commands
 
