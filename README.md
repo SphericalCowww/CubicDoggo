@@ -1,24 +1,33 @@
 # Cubic Doggo: Homemade 12-DOF 4-Legged Robot Recipe
 
-**Walking robot dog with all commercial/3D-printed parts!**
-
 <img src="https://github.com/SphericalCowww/ROS_Cubic_Doggo/blob/main/CubicDoggo.png" width="300"> 
 
-Derived from: <a href="https://github.com/SphericalCowww/ROS_leggedRobot_testBed">GitHub</a>/<a href="https://www.reddit.com/r/robotics/comments/1rouerc/first_time_building_a_hobbyist_robot_from_scratch/">Reddit</a>
+**Building from scratch a walking robot dog with all commercial/3D-printed parts and ROS2!**
 
-Upgraded the center of mass: <a href="https://www.reddit.com/r/ROS/comments/1roiee3/i_built_a_4legged_12dof_robot_dog_using_ros_2_i/">Reddit</a>
+Demos: derived from (<a href="https://github.com/SphericalCowww/ROS_leggedRobot_testBed">GitHub</a>/<a href="https://www.reddit.com/r/robotics/comments/1rouerc/first_time_building_a_hobbyist_robot_from_scratch/">Reddit</a>), upgrade in center of mass (<a href="https://www.reddit.com/r/ROS/comments/1roiee3/i_built_a_4legged_12dof_robot_dog_using_ros_2_i/">Reddit</a>), upgrade in walk gait (<a href="https://www.reddit.com/r/ROS/comments/1t8g1my/cubic_doggo_update_phew_it_finally_walks_with/">Reddit</a>)
 
-Upgraded the walk gait: <a href="https://www.reddit.com/r/ROS/comments/1t8g1my/cubic_doggo_update_phew_it_finally_walks_with/">Reddit</a>
-
-All the CAD models can be found here: <a href="https://github.com/SphericalCowww/CubicDoggo/tree/main/src/my_robot_description/mesh/CADv1">link</a>
-
-This is a project developed by a complete hobbyist at home, who was so ready to build a Stanford series replica, only to realize afterward that it cannot be done without all the university/research institute resources. So this project will only use commercial/3D-printed parts: no CNC machining, no custom PCBs, and no special motors needed. Moreover, to keep things simple, only 1 type of motor is used. No gears, no tiny delicate parts, and keeping all screw size M3 unless required by the commercial parts. There are, however, two occasions that require soldering, one is a Y-wire for the DYNAMIXEL servo controller, while the other is an optional capacitor-to-ground link. The electronics are exposed for easy future addons, and yes, the LIDAR is currently just used as a counter-weight.
-
-All software used is open source, including FreeCAD/Cura and Ubuntu/ROS2/MoveIt2. "Cubic" is also regarding the minimalistic CAD design, easy to draw, and easy to print. And yes, I am too lazy to do fillets; FreeCAD will drive you nuts if you try to reapply this after any tiny changes. Note that every CAD piece has an orientation that is easy to print, though. Coding-wise, I only add comments on special occasions, but I describe parameter names and order the code mostly to be read from top-to-bottom. I try to follow as much standard structure from ROS (see, for example, a <a href="https://github.com/SphericalCowww/ROS_init_practice/tree/main/ros2_ws3_interface">lifecycle</a>).
-
-The recipe should cover the construction from the ground up, since that is also how I get to know how to build, while skipping all the mistakes made (check <a href="https://github.com/SphericalCowww/ROS_leggedRobot_testBed">GitHub</a> for all previous tests). Hopefully, the document is as modular as possible, so that it can be started and debugged step by step. For software, all the key parameters will be recorded, but will rely on the ROS structure to explain the rest. I am a hobbyist after all, not a robotics expert, so I ain't explaining what IK or IMU are, since I learn them the same way all non-experts do, by checking them out on Youtube. Nevertheless, this also means you don't need to be an expert to build this Cubic Doggo.
+All the FreeCAD files can be found here: <a href="https://github.com/SphericalCowww/CubicDoggo/tree/main/src/my_robot_description/mesh/CADv1">link</a>
 
 # Ingredients
+
+## Hardware Requirements
+
+| device | DYNAMIXEL models | number | specification |
+| - | - | - | - |
+| servo motor | DYNAMIXEL <a href="https://emanual.robotis.com/docs/en/dxl/x/xl430-w250/">XL430-W250-T</a> | 12 | Max stall torque: 1.5 N*m (at 12.0V, 1.4A, 1.071 Nm/A) |
+| USB communication interface | DYNAMIXEL <a href="https://emanual.robotis.com/docs/en/parts/interface/u2d2/">U2D2</a> | 1 | Can control 12 servo in daisy chain if properly powered |
+| communication/power hub | DYNAMIXEL <a href="https://emanual.robotis.com/docs/en/parts/interface/u2d2_power_hub/">U2D2 power hub board</a> | 2 | Operating voltage	3.5-24V withg a maximum current	of 10A |
+| onboard computer | <a href="https://www.raspberrypi.com/products/raspberry-pi-5/">rasp pi 5</a> | 1 | | 
+| DC-DC step-down convertor | Hailege <a href="https://www.amazon.de/Hailege-Module-Step-Down-Supply-Converter/dp/B07XFMMY1F">24V/12V to 5V/5A</a> | 1 | USB Port port to rasp pi 5,  DC 5.5mm x 2.5mm Male to battery | 
+| battery | ZYGY <a href="https://www.amazon.de/dp/B0BB6RMM5Q">11.1V 2000mAh</a> | 2 | They already include protection. Need Charger. Need adapters for: T-plug => XT60 Male => DC 5.5mm x 2.5mm Male | 
+| bearings | M3 bearing+<a href="https://www.amazon.de/dp/B01M2ZCLKX">spacer</a>, threaded rod, rod-end bearing | 8, 4, 4, 4 | rod length of 60mm to match the leg length; other dimensions can be accomodated by modifying the CAD |
+| bolts and nuts | | | M3 hardware is used throughout, except where required to accommodate the servos and electronic boards; use locknuts |
+
+Optional:
+
+| device | DYNAMIXEL models | number | specification |
+| - | - | - | - |
+| power supply | SMPS | - | 12V/5A for testing without batteries | 
 
 ## Special soldering requirements
 
@@ -26,19 +35,6 @@ The recipe should cover the construction from the ground up, since that is also 
 - no gears and avoiding tiny parts unless required by the servos/electronics. All nuts aiming for 3M
 - exposed electronics for incorporating any future add-ons
 
-## Hardware Requirements
-
-| device | DYNAMIXEL models | number | specification |
-| - | - | - | - |
-| controller | <a href="https://www.raspberrypi.com/products/raspberry-pi-5/">rasp pi 5</a> | 1 | 16Gb RAM | 
-| DC-DC step-down convertor | Hailege <a href="https://www.amazon.de/Hailege-Module-Step-Down-Supply-Converter/dp/B07XFMMY1F">24V/12V to 5V/5A</a> | 1 | USB Port port to rasp pi 5,  DC 5.5mm x 2.5mm Male to battery | 
-| USB communication interface | DYNAMIXEL <a href="https://emanual.robotis.com/docs/en/parts/interface/u2d2/">U2D2</a> | 1 | Can control 12 servo in daisy chain if properly powered |
-| communication/power hub | DYNAMIXEL <a href="https://emanual.robotis.com/docs/en/parts/interface/u2d2_power_hub/">U2D2 power hub board</a> | 2 | Operating voltage	3.5-24V withg a maximum current	of 10A |
-| servo motor | DYNAMIXEL <a href="https://emanual.robotis.com/docs/en/dxl/x/xl430-w250/">XL430-W250-T</a> | 12 | Max stall torque: 1.5 N*m (at 12.0V, 1.4A, 1.071 Nm/A) |
-| battery | ZYGY <a href="https://www.amazon.de/dp/B0BB6RMM5Q">11.1V 2000mAh</a> | 2 | already includes protection. Need adapters for: T-plug => XT60 Male => DC 5.5mm x 2.5mm Male | 
-| power supply | SMPS | - | 12V/5A for testing without batteries | 
-| bearings | standard bearing, threaded rod, rod-end bearing, <a href="https://www.amazon.de/dp/B01M2ZCLKX">spacer</a> | 8, 4, 4, 4 | as long as the dimensions work out together, but the rod length so far is 60mm |
-| bolts and nuts | | | DYNAMIXEL provides most < M3 bolts; use lock nuts; also best to have threaded inserts for 3D-printer materials, but designed choices can get around it |
 
 #### 3D CAD dimensions
 
@@ -357,10 +353,10 @@ For the low rasp pi power alarm, it's set by the rasp_pi_peripheral_node:
 
 # Future development directions
 
-- Cubic Doggo MKII: strengthen the 2nd servo holding design, use PLA+, use STS-3215 (high torque, cheaper, but harder to develop)
-- Cubic Doggo <a href="https://github.com/chvmp/champ">CHAMP</a>: adapting IMU, and check the compatibility to the CHAMP framework
+- Cubic Doggo MKII: strengthen the 2nd servo holding design, test with PLA+ (less likely to crack), test with STS-3215 (high torque, cheaper, but harder to develop), and use a Bluetooth controller
+- Cubic Doggo <a href="https://github.com/chvmp/champ">CHAMP</a>: adapting IMU, and checking the compatibility with the CHAMP framework
 - Cubic Doggo RL: walk gait trained by the RL using whatever open software available
 
 # Acknowledgement
 
-- Thank my second brother, who is a mechanical engineer, for advising me to use the locknuts, all-directional bearings, and battery for RC boats, as well as buying me a bunch of screws for cheap. But he also suggested me to use 100% 3D-filling with cavities to cut weight instead, which I followed only to a degree. Anyways, he doesn't have a GitHub account, so probably will never find out.
+- Thank my second brother, who is a mechanical engineer, for advising me to use the locknuts, all-directional bearings, and battery for RC boats, as well as buying me a bunch of screws for cheap. 
