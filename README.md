@@ -19,8 +19,8 @@ The 3D printer model VOXELAB Aquila X2 is used, but as long as it prints PLA, it
 | servo motor | DYNAMIXEL <a href="https://emanual.robotis.com/docs/en/dxl/x/xl430-w250/">XL430-W250-T</a> | 12 | Max stall torque: 1.5 N*m (at 12.0V, 1.4A, 1.071 Nm/A). Need also corresponding signal wires of various length |
 | USB communication interface | DYNAMIXEL <a href="https://emanual.robotis.com/docs/en/parts/interface/u2d2/">U2D2</a> | 1 | Can control 12 servo in daisy chain if properly powered |
 | communication/power hub | DYNAMIXEL <a href="https://emanual.robotis.com/docs/en/parts/interface/u2d2_power_hub/">U2D2 power hub board</a> | 2 | Operating voltage	3.5-24V withg a maximum current	of 10A |
-| onboard computer | <a href="https://www.raspberrypi.com/products/raspberry-pi-5/">rasp pi 5</a> | 1 | | 
-| DC-DC step-down convertor | Hailege <a href="https://www.amazon.de/Hailege-Module-Step-Down-Supply-Converter/dp/B07XFMMY1F">24V/12V to 5V/5A</a> | 1 | USB Port port to rasp pi 5,  DC 5.5mm x 2.5mm Male to battery | 
+| onboard computer | <a href="https://www.raspberrypi.com/products/raspberry-pi-5/">Raspberry Pi 5</a> | 1 | | 
+| DC-DC step-down convertor | Hailege <a href="https://www.amazon.de/Hailege-Module-Step-Down-Supply-Converter/dp/B07XFMMY1F">24V/12V to 5V/5A</a> | 1 | USB Port port to RaspPi,  DC 5.5mm x 2.5mm Male to battery | 
 | battery | ZYGY <a href="https://www.amazon.de/dp/B0BB6RMM5Q">11.1V 2000mAh</a> | 2 | They already include protection. Need Charger. Need adapters for: T-plug => XT60 Male => DC 5.5mm x 2.5mm Male | 
 | bearings | M3 bearing+<a href="https://www.amazon.de/dp/B01M2ZCLKX">spacer</a>, threaded rod, rod-end bearing | 8, 4, 4, 4 | rod length of 60mm to match the leg length; other dimensions can be accomodated by modifying the CAD |
 | bolts and nuts | | | M3 hardware is used throughout, except where required to accommodate the servos and electronic boards; use locknuts |
@@ -164,7 +164,7 @@ Update to run the firmware with proper permissions to avoid latency:
 
 # Running a single leg on ROS2
 
-## testing the driver in ROS2
+## Testing the driver in ROS2
 
     colcon build
     source install/setup.bash
@@ -189,9 +189,7 @@ Under ``ma_robot.ros2_control.xacro``, switch ``<plugin>mock_components/GenericS
     ros2 topic info /gripper_set_open
     ros2 topic pub -1 /gripper_set_open example_interfaces/msg/Bool "{data: false}"
 
-## Launch ROS2 interface with 1 leg
-
-### launch urdf
+## Launch urdf
 
 Then run the following:
 
@@ -205,50 +203,7 @@ Then run the following:
 
 [Video demo](https://raw.githubusercontent.com/SphericalCowww/ROS_leggedRobot_testBed/main/rViz1Leg.mp4)
 
-### moveit2 setup assistance with a leg
-
-Launch the MoveIt assistance:
-
-    sudo apt update
-    sudo apt install
-    colcon build
-    source install/setup.bash
-    ros2 launch moveit_setup_assistant setup_assistant.launch.py
-    # Create New Moveit Configuration Package (or edit if the configuration files already exist)
-    # Browse => src/my_robot_description/urdf/my_robot.urdf.xacro => Load Files
-    # Start Screen: can toggle visual/collision
-    # Self-Collisions => Generate Collision Matrix: removes all never-in-contact and adjacent collisions
-    # Virtual Joints => Add Virtual Joint => Virtual Joint Name: virtual_joint => Parent Frame Name: world => Joint Type: fixed => Save
-    ## no need if already defined in urdf. Can always comment out afterwards in /src/my_robot_moveit_config/config/my_robot.srdf 
-    # Planning Groups => Add Group => Group Name: leg1 => Kinametic Solver: kdl_kinematics_plugin => Add Joints => 
-    ## choose with right arrow "servo1_servo1_padding", "servo2_servo2_padding", "servo3_calfFeet", and "calfFeet_calfSphere" => Save
-    # Robot Poses => Add Pose => all joints at 0 => Pose Name: home => Save: can add a few other ones for debugging
-    # ros2_control URDF Model => position for Command Interfaces and State Interfaces => Add interfaces
-    # ROS2 Controllers => Auto Add JointTrajectoryController
-    # Moveit Controllers => Auto Add FollowJointsTrajectory
-    # Author Information => add anything (e.g. "my_robot", "my_robot@gmail.com"), otherwise bugged
-    # Configuration Files => Browse: src/my_robot_moveit_config/ => Generate Package: double check if files are generated => Exit Setup Assistant
-
-Fix the following file:
-
-    # src/my_robot_moveit_config/config/joint_limits.yaml => max_velocity: 20.0, has_acceleration_limits: true, max_acceleration: 10.0 (need to be float)
-    # src/my_robot_moveit_config/config/moveit_controllers.yaml => add the following under leg1_controller: 
-    ## action_ns: follow_joint_trajectory
-    ## default: true
-    # src/my_robot_moveit_config/config/initial_positions.yaml => servo1_servo1_padding: 3.14, servo2_servo2_padding: 3.14, servo3_calfJoint: 3.14
-    # src/my_robot_moveit_config/config/my_robot.srdf => include only the following in <group name="leg1">:
-    ## <group name="leg1">
-    ##     <chain base_link="base_link" tip_link="calfSphere"/>
-    ## </group>
-    # src/my_robot_moveit_config/config/kinematics.yaml => replace with the following:
-    ##leg1:
-    ##  kinematics_solver: kdl_kinematics_plugin/KDLKinematicsPlugin
-    ##  kinematics_solver_search_resolution: 0.005
-    ##  kinematics_solver_timeout: 0.05
-    ##  kinematics_solver_attempts: 3
-    ##  position_only_ik: True        # this one is important because the leg does NOT care about the orientation of the end effector
-
-### launch the demo:
+## Launch MoveIt2 demo:
 
     colcon build
     source install/setup.bash
@@ -263,22 +218,13 @@ Fix the following file:
 
 Note that to move the motion wheel in rViz:
 
-    # toggle: Approx IK Soluations
+    # toggle: Approx IK Solutions
     # toggle if needed: MotionPlanning => Planned Path => Loop Animation
     # toggle if needed: Use Cartesian Path 
 
-### launch with a proper launch file:
+## Launch with launch file:
 
-    mv src/my_robot_moveit_config/config/ros2_controllers.yaml src/my_robot_bringup/config/my_robot_controllers.yaml
-    # change the following line if needed in my_robot_controllers.yaml
-    ## update_rate: 100 # Hz
-    mv src/my_robot_moveit_config/config/my_robot.ros2_control.xacro src/my_robot_description/urdf/
-    rm src/my_robot_moveit_config/config/my_robot.urdf.xacro
-    # modify the following line in my_robot.ros2_control.xacro:
-    ## remove: <xacro:property name="initial_positions" value="${xacro.load_yaml(initial_positions_file)['initial_positions']}"/>
-    ## for all servos, update to: <param name="initial_value">3.14</param> 
-    # adding the following line in my_robot.urdf.xacro:
-    ## <xacro:include filename="my_robot.ros2_control.xacro" />
+    cd CubicDogg
     colcon build
     source install/setup.bash
     ros2 launch my_robot_bringup my_robot.launch.py
@@ -287,14 +233,17 @@ Note that to move the motion wheel in rViz:
     ## Context => Planning Library => ompl
     ## Planning => Goal State: pose1 => Plan => Execute
 
-# Running peripherals
 
 # Running full robot
 
-## Basic Commands
+## Launch with commands
 
 Start the robot (skip launching rviz_node, joy_driver_node, or joy_controller_node if needed):
 
+    cd CubicDogg
+    colcon build
+    source install/setup.bash
+    # comment in rvis node in CubicDoggo/src/my_robot_bringup/launch/cubic_doggo.with_lifecycle.launch.py
     ros2 launch my_robot_bringup cubic_doggo.with_lifecycle.launch.py
     # on another terminal
     ros2 topic pub -1 /leg_set_named example_interfaces/msg/String "{data: "rest"}"
@@ -305,7 +254,7 @@ Start the robot (skip launching rviz_node, joy_driver_node, or joy_controller_no
     ros2 topic pub -1 /leg_set_pose my_robot_interface/msg/CubicDoggoLegPoseTarget "{leg_index: 0, x: -0.092, y: 0.053, z: 0.135}" 
     ros2 service call /leg_walk_toggle std_srvs/srv/SetBool "{data: true}"
 
-Debugging the ``joy_controller_node``:
+## Testing the joystick controller:
 
     ls /dev/input/js*
     # output: /dev/input/js0
@@ -322,10 +271,10 @@ Debugging the ``joy_controller_node``:
     ros2 node info /cubic_doggo_joy_control    
     ros2 topic info /joy --verbose
     ros2 topic echo /joy
-    
-### check low power/battery alarm
 
-For the low rasp pi power alarm, it's set by the rasp_pi_peripheral_node:
+## Testing low power alarm
+
+For the low RaspPi power alarm, it's set by the rasp_pi_peripheral_node:
 
     for d in /sys/class/hwmon/hwmon*; do echo -n "$d: "; cat "$d/name"; done   # find the correct path for power alarm
     # update /home/cubicdoggo/Documents/CubicDoggo/src/my_robot_bringup/launch/cubic_doggo.with_lifecycle.launch.py
@@ -335,8 +284,10 @@ For the low rasp pi power alarm, it's set by the rasp_pi_peripheral_node:
     ros2 run my_robot_commander rasp_pi_peripheral_node --ros-args -p power_path:=$(which ever power alarm path)
     # create a fake alarm by
     echo 1 > /tmp/fake_alarm
-### launch at the start of turning on rasp pi
+    
+## Launch at the start of RaspPi
 
+    # comment out rvis node in CubicDoggo/src/my_robot_bringup/launch/cubic_doggo.with_lifecycle.launch.py
     chmod +x /home/cubicdoggo/Documents/CubicDoggo/start_robot.sh
     sudo cp /home/cubicdoggo/Documents/CubicDoggo/robot_startup.service /etc/systemd/system/robot_startup.service
     sudo chmod 644 /etc/systemd/system/robot_startup.service
