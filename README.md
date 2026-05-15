@@ -28,6 +28,7 @@ All the FreeCAD files can be found here: <a href="https://github.com/SphericalCo
 | device | models | count | specification |
 | - | - | - | - |
 | 3D printer | VOXELAB Aquila X2 | 1 | any printer that prints PLA would do | 
+| filament | PLA | - |  | 
 
 Optional:
 
