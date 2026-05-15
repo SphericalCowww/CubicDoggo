@@ -85,7 +85,12 @@ Following <a href="https://github.com/SphericalCowww/ROS_init_practice">github</
     dpkg -l | grep dynamixel
     ros2 pkg list | grep dynamixel
 
-Then copy <a href="https://github.com/ROBOTIS-GIT/dynamixel-workbench/tree/main/dynamixel_workbench_toolbox/examples/src">src</a> directly under ``/src/my_toolbox_dynamixel_workbench``. And for every ``.cpp`` file, change the following line:
+Clone this repository,
+
+    git clone https://github.com/SphericalCowww/CubicDoggo.git
+    cd CubicDoggo
+
+Then copy <a href="https://github.com/ROBOTIS-GIT/dynamixel-workbench/tree/main/dynamixel_workbench_toolbox/examples/src">src</a> directly under ``CubicDoggo/src/my_toolbox_dynamixel_workbench``. And for every ``.cpp`` file, change the following line:
 
     #include <DynamixelWorkbench.h>
 
@@ -94,12 +99,13 @@ To,
     #include <cstdlib>
     #include "dynamixel_workbench_toolbox/dynamixel_workbench.h"
 
-Then ``cd ROS_leggedRobot_testBed`` and build,
+Then,
 
+    cd CubicDoggo
     colcon build
     source install/setup.bash
 
-Connect U2D2 to Rasp Pi USB port. To check if ROS2 sees the servos: 
+Connect U2D2 to the RaspPi USB port. To check if ROS2 sees the servos: 
 
     sudo dmesg | tail -n 20
     # look for:
@@ -109,6 +115,8 @@ Connect U2D2 to Rasp Pi USB port. To check if ROS2 sees the servos:
     sudo chmod a+rw /dev/ttyUSB0                   # required everytime after reconnection
     ros2 run my_toolbox_dynamixel_workbench model_scan /dev/ttyUSB0 2000000
     ros2 run my_toolbox_dynamixel_workbench position /dev/ttyUSB0 2000000 11 0.5
+
+## Setting the latency
 
 Update USB port latency to 1 ms. Note that this USB signal is delicate; use as short and high-quality a USB cable as possible.: 
 
@@ -153,21 +161,10 @@ Update to run the firmware with proper permissions to avoid latency:
     @realtime hard memlock unlimited
     ---------- 
     sudo reboot
-    # 
-
-    ### testing the driver in ROS2
-
-    colcon build
-    source install/setup.bash
-    ros2 run my_robot_firmware testRaspPi5_dynamixel_u2d2_leg1swing_xl430
-    ps -ef | grep testRaspPi5_dynamixel_u2d2_leg1swing_xl430                 # to kill it before it ends
-    # only when dynamixels are not connected to into a leg: 
-    ## ros2 run my_robot_firmware testRaspPi5_dynamixel_u2d2_channel0_xl430 
-    ## ros2 run my_robot_firmware testRaspPi5_dynamixel_u2d2_leg1swipe_xl430
 
 # Running a single leg on ROS2
 
-### testing the driver in ROS2
+## testing the driver in ROS2
 
     colcon build
     source install/setup.bash
