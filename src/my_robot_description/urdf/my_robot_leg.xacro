@@ -32,7 +32,7 @@
     <link name="main_board">
         <visual>
             <geometry>
-                <mesh filename="package://my_robot_description/mesh/CADv0/_mod_basePlate-Body.stl" scale="0.001 0.001 0.001"/>
+                <mesh filename="package://my_robot_description/mesh/CADv1/basePlate.stl" scale="0.001 0.001 0.001"/>
             </geometry>
             <origin xyz="0 0 0" rpy="0 0 0"/>
             <material name="grey"/>
@@ -55,7 +55,7 @@
     <link name="servo1_holder">
         <visual>
             <geometry>
-                <mesh filename="package://my_robot_description/mesh/CADv0/_mod_XL-430holderBasic-Body.stl" scale="0.001 0.001 0.001"/>
+                <mesh filename="package://my_robot_description/mesh/CADv1/XL-430holderBasic.stl" scale="0.001 0.001 0.001"/>
             </geometry>
             <material name="white"/>
             <origin xyz="0 0 0" rpy="0 0 ${urdf_pi/2}"/>
@@ -125,7 +125,7 @@
     <link name="servo2_holder">
         <visual>
             <geometry>
-                <mesh filename="package://my_robot_description/mesh/CADv0/_mod_XL-430holderBasic-Body.stl" scale="0.001 0.001 0.001"/>
+                <mesh filename="package://my_robot_description/mesh/CADv1/XL-430holderBasic.stl" scale="0.001 0.001 0.001"/>
             </geometry>
             <material name="white"/>
             <origin xyz="0 0 0" rpy="${urdf_pi/2} 0 0"/>
@@ -195,7 +195,7 @@
     <link name="inner_thigh">
         <visual>
             <geometry>
-                <mesh filename="package://my_robot_description/mesh/CADv0/_mod_thighInner-Body.stl" scale="0.001 0.001 0.001"/>
+                <mesh filename="package://my_robot_description/mesh/CADv1/thighInner.stl" scale="0.001 0.001 0.001"/>
             </geometry>
             <material name="blue"/>
             <origin xyz="0 0 0" rpy="${-urdf_pi/2} 0 ${-urdf_pi/2}"/>
@@ -217,7 +217,7 @@
     <link name="outer_thigh">
         <visual>
             <geometry>
-                <mesh filename="package://my_robot_description/mesh/CADv0/_mod_thighOuter-Body.stl" scale="0.001 0.001 0.001"/>
+                <mesh filename="package://my_robot_description/mesh/CADv1/thighOuter.stl" scale="0.001 0.001 0.001"/>
             </geometry>
             <material name="blue"/>
             <origin xyz="0 0 0" rpy="${-urdf_pi/2} 0 ${-urdf_pi/2}"/>
@@ -262,7 +262,7 @@
     <link name="calfFeet">
         <visual>
             <geometry>
-                <mesh filename="package://my_robot_description/mesh/CADv0/calfFeet-Body.stl" scale="0.001 0.001 0.001"/>
+                <mesh filename="package://my_robot_description/mesh/CADv1/calfFeet.stl" scale="0.001 0.001 0.001"/>
             </geometry>
             <material name="purple"/>
             <origin xyz="-0.004 -0.008 0.035" rpy="0 ${urdf_pi/2} 0"/>
@@ -288,7 +288,7 @@
     <link name="calfJoint">
         <visual>
             <geometry>
-                <mesh filename="package://my_robot_description/mesh/CADv0/_mod_calfJoint-Body.stl" scale="0.001 0.001 0.001"/>
+                <mesh filename="package://my_robot_description/mesh/CADv1/calfJoint.stl" scale="0.001 0.001 0.001"/>
             </geometry>
             <origin xyz="0 0 0" rpy="${urdf_pi/2} 0 ${-urdf_pi/2}"/>
             <material name="white"/>
