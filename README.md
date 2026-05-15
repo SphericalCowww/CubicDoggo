@@ -12,9 +12,9 @@ All the FreeCAD files can be found here: <a href="https://github.com/SphericalCo
 
 ## Hardware Requirements
 
-| device | DYNAMIXEL models | number | specification |
+| device | models | count | specification |
 | - | - | - | - |
-| servo motor | DYNAMIXEL <a href="https://emanual.robotis.com/docs/en/dxl/x/xl430-w250/">XL430-W250-T</a> | 12 | Max stall torque: 1.5 N*m (at 12.0V, 1.4A, 1.071 Nm/A) |
+| servo motor | DYNAMIXEL <a href="https://emanual.robotis.com/docs/en/dxl/x/xl430-w250/">XL430-W250-T</a> | 12 | Max stall torque: 1.5 N*m (at 12.0V, 1.4A, 1.071 Nm/A). Need also corresponding signal wires of various length |
 | USB communication interface | DYNAMIXEL <a href="https://emanual.robotis.com/docs/en/parts/interface/u2d2/">U2D2</a> | 1 | Can control 12 servo in daisy chain if properly powered |
 | communication/power hub | DYNAMIXEL <a href="https://emanual.robotis.com/docs/en/parts/interface/u2d2_power_hub/">U2D2 power hub board</a> | 2 | Operating voltage	3.5-24V withg a maximum current	of 10A |
 | onboard computer | <a href="https://www.raspberrypi.com/products/raspberry-pi-5/">rasp pi 5</a> | 1 | | 
@@ -23,30 +23,32 @@ All the FreeCAD files can be found here: <a href="https://github.com/SphericalCo
 | bearings | M3 bearing+<a href="https://www.amazon.de/dp/B01M2ZCLKX">spacer</a>, threaded rod, rod-end bearing | 8, 4, 4, 4 | rod length of 60mm to match the leg length; other dimensions can be accomodated by modifying the CAD |
 | bolts and nuts | | | M3 hardware is used throughout, except where required to accommodate the servos and electronic boards; use locknuts |
 
+3D printer:
+
+| device | models | count | specification |
+| - | - | - | - |
+| 3D printer | VOXELAB Aquila X2 | 1 | any printer that prints PLA would do | 
+
 Optional:
 
-| device | DYNAMIXEL models | number | specification |
+| device | models | count | specification |
 | - | - | - | - |
-| power supply | SMPS | - | 12V/5A for testing without batteries | 
+| power supply | SMPS | 1 | 12V/5A for testing without batteries | 
+| capacitor | 1000uF | 2 | rating 25V or higher | 
 
 ## Special soldering requirements
 
-- modulo for building from the ground up
-- no gears and avoiding tiny parts unless required by the servos/electronics. All nuts aiming for 3M
-- exposed electronics for incorporating any future add-ons
+  * Solder two <a href="https://emanual.robotis.com/docs/en/dxl/x/xl320/#connector-information">MOLEX 51065-0300</a> cables together to form a Y-wire, otherwise U2D2 doesn't have enough connectors
+  * Optional: connect a wire between the 2 U2D2 power hubs such that they have shared ground. Then solder a capacitor at each end to the power rail. Careful about all the connection directions; otherwise, the whole power system can be severely damaged
 
+<img src="https://github.com/SphericalCowww/ROS_leggedRobot_testBed/blob/main/powerSystemSharingGround.png" width="200"> 
 
-#### 3D CAD dimensions
+## Power System
 
-  * using 3M screws overall, as they are much more common. Piece thickness will be 4mm, except when a 3M screw is required on the thickness axis, then it's 6mm. For aperture dimension, 1.7mm radius for clearance, and 1.25mm for tapped without a heated insert.
+  * Daisy chain no more than 3 servos to avoid delay
+  * Powering the hubs using their SMPS DC jacks. Then use the molex/screw terminal as an output to power the RaspPi via a ~12V-to-5V DC-DC converter.
 
-### Power System
-
-  * The daisy chain is recommended to chain 4 or fewer servos to avoid delay
-  * Using a single U2D2 to connect to two U2D2 power hub boards, which requires a Y-cable from U2D2 to the 2 hubs: need to custom-connect two <a href="https://emanual.robotis.com/docs/en/dxl/x/xl320/#connector-information">MOLEX 51065-0300</a> cables to make a Y-cable.
-  * Powering the hubs using their SMPS DC jacks. Then use the molex/screw terminal as an output to power the Raspberry Pi 5 via a 12V-to-5V DC-DC converter.
-
-<img src="https://github.com/SphericalCowww/ROS_leggedRobot_testBed/blob/main/powerSystem.png" width="500"> <img src="https://github.com/SphericalCowww/ROS_leggedRobot_testBed/blob/main/powerSystemSharingGround.png" width="200"> 
+<img src="https://github.com/SphericalCowww/ROS_leggedRobot_testBed/blob/main/powerSystem.png" width="500"> 
 
 # Running a single servo on ROS2
 
