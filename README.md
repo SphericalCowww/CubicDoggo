@@ -164,19 +164,13 @@ Update to run the firmware with proper permissions to avoid latency:
 
 # Running a single leg on ROS2
 
-## Testing the driver in ROS2
+## Testing the ros2_control and MoveIt
 
-    colcon build
-    source install/setup.bash
-    ros2 run my_robot_firmware testRaspPi5_dynamixel_u2d2_leg1swing_xl430
-    ps -ef | grep testRaspPi5_dynamixel_u2d2_leg1swing_xl430                 # to kill it before it ends
-    # only when dynamixels are not connected to into a leg: 
-    ## ros2 run my_robot_firmware testRaspPi5_dynamixel_u2d2_channel0_xl430 
-    ## ros2 run my_robot_firmware testRaspPi5_dynamixel_u2d2_leg1swipe_xl430
-
-    ### testing the driver with ros2_control and MoveIt
-Under ``ma_robot.ros2_control.xacro``, switch ``<plugin>mock_components/GenericSystem</plugin-->`` to ``<plugin>ma_robot_namespace::HardwareInterfaceU2D2_ma_robot</plugin>``. The latter plugin type can be found at the bottom of ``src/my_robot_firmware/hardware_interface_ma_robot_dynamixel_u2d2_xl430.xml``. Then run the following:
-
+Under ``ma_robot.ros2_control.xacro``, 
+   
+   * use ``<plugin>mock_components/GenericSystem</plugin>`` if just want rViz
+   * use ``<plugin>ma_robot_namespace::HardwareInterfaceU2D2_ma_robot</plugin>`` if want to control hardware
+    
     colcon build
     source install/setup.bash
     ros2 launch my_robot_bringup ma_robot.with_commander.launch.py
@@ -238,6 +232,17 @@ Note that to move the motion wheel in rViz:
 
 ## Launch with commands
 
+Under: ``CubicDoggo/src/my_robot_description/urdf/cubic_doggo.ros2_control.xacro``
+
+   * use ``<plugin>mock_components/GenericSystem</plugin>`` if just want rViz
+   * use ``<<plugin>cubic_doggo_namespace/HardwareInterfaceU2D2_cubic_doggo</plugin>`` if want to control hardware
+
+Under: ``CubicDoggo/src/my_robot_bringup/launch/cubic_doggo.with_lifecycle.launch.py``
+
+   * comment out ``rviz_node`` if don't want rViz to show
+   * comment out ``joy_driver_node`` and ``joy_controller_node`` if don't want the joystick controller
+   * comment out ``peripheral_node`` if don't want warning from low power
+
 Start the robot (skip launching rviz_node, joy_driver_node, or joy_controller_node if needed):
 
     cd CubicDogg
@@ -253,6 +258,9 @@ Start the robot (skip launching rviz_node, joy_driver_node, or joy_controller_no
     ros2 topic pub -1 /leg_set_joint example_interfaces/msg/Float64MultiArray "{data: [0, 3.14, 3.14, 3.54]}"
     ros2 topic pub -1 /leg_set_pose my_robot_interface/msg/CubicDoggoLegPoseTarget "{leg_index: 0, x: -0.092, y: 0.053, z: 0.135}" 
     ros2 service call /leg_walk_toggle std_srvs/srv/SetBool "{data: true}"
+    ros2 service call /leg_walk_toggle std_srvs/srv/SetBool "{data: false}"
+
+Check out all the gait options under ``CubicDoggo/src/my_robot_commander/src/cubic_doggo_lifecycle.cpp``
 
 ## Testing the joystick controller:
 
@@ -287,7 +295,6 @@ For the low RaspPi power alarm, it's set by the rasp_pi_peripheral_node:
     
 ## Launch at the start of RaspPi
 
-    # comment out rvis node in CubicDoggo/src/my_robot_bringup/launch/cubic_doggo.with_lifecycle.launch.py
     chmod +x /home/cubicdoggo/Documents/CubicDoggo/start_robot.sh
     sudo cp /home/cubicdoggo/Documents/CubicDoggo/robot_startup.service /etc/systemd/system/robot_startup.service
     sudo chmod 644 /etc/systemd/system/robot_startup.service
