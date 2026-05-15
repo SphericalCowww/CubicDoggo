@@ -6,13 +6,13 @@
 
 Demos: derived from (<a href="https://github.com/SphericalCowww/ROS_leggedRobot_testBed">GitHub</a>/<a href="https://www.reddit.com/r/robotics/comments/1rouerc/first_time_building_a_hobbyist_robot_from_scratch/">Reddit</a>), upgrade in center of mass (<a href="https://www.reddit.com/r/ROS/comments/1roiee3/i_built_a_4legged_12dof_robot_dog_using_ros_2_i/">Reddit</a>), upgrade in walk gait (<a href="https://www.reddit.com/r/ROS/comments/1t8g1my/cubic_doggo_update_phew_it_finally_walks_with/">Reddit</a>)
 
-# Ingredients
+## Ingredients
 
-## 3D printing
+### 3D printing
 
 The 3D printer model VOXELAB Aquila X2 is used, but as long as it prints PLA, it's good. All the FreeCAD files can be found here: <a href="https://github.com/SphericalCowww/CubicDoggo/tree/main/src/my_robot_description/mesh/CADv1">link</a>.
 
-## Hardware requirements
+### Hardware requirements
 
 | device | models | count | specification |
 | - | - | - | - |
@@ -32,23 +32,23 @@ Optional:
 | power supply | SMPS | 1 | 12V/5A for testing without batteries | 
 | capacitor | 1000uF | 2 | rating 25V or higher | 
 
-## Special soldering requirements
+### Special soldering requirements
 
   * Solder two <a href="https://emanual.robotis.com/docs/en/dxl/x/xl320/#connector-information">MOLEX 51065-0300</a> cables together to form a Y-wire, otherwise U2D2 doesn't have enough connectors
   * Optional: connect a wire between the 2 U2D2 power hubs such that they have shared ground. Then solder a capacitor at each end to the power rail. Careful about all the connection directions; otherwise, the whole power system can be severely damaged
 
 <img src="https://github.com/SphericalCowww/ROS_leggedRobot_testBed/blob/main/powerSystemSharingGround.png" width="200"> 
 
-## Power system
+### Power system
 
   * Daisy chain no more than 3 servos to avoid delay
   * Powering the hubs using their SMPS DC jacks. Then use the molex/screw terminal as an output to power the RaspPi via a ~12V-to-5V DC-DC converter.
 
 <img src="https://github.com/SphericalCowww/ROS_leggedRobot_testBed/blob/main/powerSystem.png" width="500"> 
 
-# Running a Single Servo on ROS2
+## Running a Single Servo on ROS2
 
-## Setting the servo IDs
+### Setting the servo IDs
 
 Connecting servo to U2D2 according to <a href="https://www.youtube.com/watch?v=FIj_NULYOKQ">YouTube</a>:
 
@@ -77,7 +77,7 @@ Can also test out the servo:
 
 For the 12 servos, the IDs are set as 11, 12, 13, 21, 22, 23, 31, 32, 33, 41, 42, and 43.
 
-## Installing the <a href="https://github.com/ROBOTIS-GIT/DynamixelSDK">dynamixel-sdk</a> and <a href="https://github.com/ROBOTIS-GIT/dynamixel-workbench">dynamixel-workbench</a>
+### Installing the <a href="https://github.com/ROBOTIS-GIT/DynamixelSDK">dynamixel-sdk</a> and <a href="https://github.com/ROBOTIS-GIT/dynamixel-workbench">dynamixel-workbench</a>
 
 Following <a href="https://github.com/SphericalCowww/ROS_init_practice">github</a> to install ROS. To install drivers for Dynamixel, 
 
@@ -116,7 +116,7 @@ Connect U2D2 to the RaspPi USB port. To check if ROS2 sees the servos:
     ros2 run my_toolbox_dynamixel_workbench model_scan /dev/ttyUSB0 2000000
     ros2 run my_toolbox_dynamixel_workbench position /dev/ttyUSB0 2000000 11 0.5
 
-## Setting the latency
+### Setting the latency
 
 Update USB port latency to 1 ms. Note that this USB signal is delicate; use as short and high-quality a USB cable as possible.: 
 
@@ -162,9 +162,9 @@ Update to run the firmware with proper permissions to avoid latency:
     ---------- 
     sudo reboot
 
-# Running a single leg on ROS2
+## Running a single leg on ROS2
 
-## Testing the ros2_control and MoveIt
+### Testing the ros2_control and MoveIt
 
 Under ``ma_robot.ros2_control.xacro``, 
    
@@ -183,7 +183,7 @@ Under ``ma_robot.ros2_control.xacro``,
     ros2 topic info /gripper_set_open
     ros2 topic pub -1 /gripper_set_open example_interfaces/msg/Bool "{data: false}"
 
-## Launch urdf
+### Launching URDF
 
 Then run the following:
 
@@ -197,7 +197,7 @@ Then run the following:
 
 [Video demo](https://raw.githubusercontent.com/SphericalCowww/ROS_leggedRobot_testBed/main/rViz1Leg.mp4)
 
-## Launch MoveIt2 demo:
+### Launching MoveIt2 demo:
 
     colcon build
     source install/setup.bash
@@ -216,7 +216,7 @@ Note that to move the motion wheel in rViz:
     # toggle if needed: MotionPlanning => Planned Path => Loop Animation
     # toggle if needed: Use Cartesian Path 
 
-## Launch with launch file:
+### Launching with launch file:
 
     cd CubicDogg
     colcon build
@@ -227,10 +227,9 @@ Note that to move the motion wheel in rViz:
     ## Context => Planning Library => ompl
     ## Planning => Goal State: pose1 => Plan => Execute
 
+## Running full robot
 
-# Running full robot
-
-## Launch with commands
+### Launching with commands
 
 Under: ``CubicDoggo/src/my_robot_description/urdf/cubic_doggo.ros2_control.xacro``
 
@@ -262,7 +261,7 @@ Start the robot (skip launching rviz_node, joy_driver_node, or joy_controller_no
 
 Check out all the gait options under ``CubicDoggo/src/my_robot_commander/src/cubic_doggo_lifecycle.cpp``
 
-## Testing the joystick controller:
+### Testing the joystick controller:
 
     ls /dev/input/js*
     # output: /dev/input/js0
@@ -280,7 +279,7 @@ Check out all the gait options under ``CubicDoggo/src/my_robot_commander/src/cub
     ros2 topic info /joy --verbose
     ros2 topic echo /joy
 
-## Testing low power alarm
+### Testing low power alarm
 
 For the low RaspPi power alarm, it's set by the rasp_pi_peripheral_node:
 
@@ -293,7 +292,7 @@ For the low RaspPi power alarm, it's set by the rasp_pi_peripheral_node:
     # create a fake alarm by
     echo 1 > /tmp/fake_alarm
     
-## Launch at the start of RaspPi
+### Launching at the start of RaspPi
 
     chmod +x /home/cubicdoggo/Documents/CubicDoggo/start_robot.sh
     sudo cp /home/cubicdoggo/Documents/CubicDoggo/robot_startup.service /etc/systemd/system/robot_startup.service
@@ -306,12 +305,12 @@ For the low RaspPi power alarm, it's set by the rasp_pi_peripheral_node:
     # journalctl -u robot_startup.service -n 100 > start_robot_output.txt      # to check the output
     # journalctl -u robot_startup.service -f
 
-# Future development directions
+## Next directions
 
 - Cubic Doggo MKII: strengthen the 2nd servo holding design, test with PLA+ (less likely to crack), test with STS-3215 (high torque, cheaper, but harder to develop), and use a Bluetooth controller
 - Cubic Doggo <a href="https://github.com/chvmp/champ">CHAMP</a>: adapting IMU, and checking the compatibility with the CHAMP framework
 - Cubic Doggo RL: walk gait trained by the RL using whatever open software available
 
-# Acknowledgement
+## Acknowledgement
 
 - Thank my second brother, who is a mechanical engineer, for advising me to use the locknuts, all-directional bearings, and battery for RC boats, as well as buying me a bunch of screws for cheap. 
