@@ -2,15 +2,17 @@
 
 <img src="https://github.com/SphericalCowww/ROS_Cubic_Doggo/blob/main/CubicDoggo.png" width="300"> 
 
-**Building from scratch a walking robot dog with all commercial/3D-printed parts and ROS2!**
+**Building from scratch a walking robot dog with all commercial/3D-printed parts and ROS2 Jazzy!**
 
 Demos: derived from (<a href="https://github.com/SphericalCowww/ROS_leggedRobot_testBed">GitHub</a>/<a href="https://www.reddit.com/r/robotics/comments/1rouerc/first_time_building_a_hobbyist_robot_from_scratch/">Reddit</a>), upgrade in center of mass (<a href="https://www.reddit.com/r/ROS/comments/1roiee3/i_built_a_4legged_12dof_robot_dog_using_ros_2_i/">Reddit</a>), upgrade in walk gait (<a href="https://www.reddit.com/r/ROS/comments/1t8g1my/cubic_doggo_update_phew_it_finally_walks_with/">Reddit</a>)
 
-All the FreeCAD files can be found here: <a href="https://github.com/SphericalCowww/CubicDoggo/tree/main/src/my_robot_description/mesh/CADv1">link</a>
-
 # Ingredients
 
-## Hardware Requirements
+## 3D printing
+
+The 3D printer model VOXELAB Aquila X2 is used, but as long as it prints PLA, it's good. All the FreeCAD files can be found here: <a href="https://github.com/SphericalCowww/CubicDoggo/tree/main/src/my_robot_description/mesh/CADv1">link</a>.
+
+## Hardware requirements
 
 | device | models | count | specification |
 | - | - | - | - |
@@ -22,13 +24,6 @@ All the FreeCAD files can be found here: <a href="https://github.com/SphericalCo
 | battery | ZYGY <a href="https://www.amazon.de/dp/B0BB6RMM5Q">11.1V 2000mAh</a> | 2 | They already include protection. Need Charger. Need adapters for: T-plug => XT60 Male => DC 5.5mm x 2.5mm Male | 
 | bearings | M3 bearing+<a href="https://www.amazon.de/dp/B01M2ZCLKX">spacer</a>, threaded rod, rod-end bearing | 8, 4, 4, 4 | rod length of 60mm to match the leg length; other dimensions can be accomodated by modifying the CAD |
 | bolts and nuts | | | M3 hardware is used throughout, except where required to accommodate the servos and electronic boards; use locknuts |
-
-3D printer:
-
-| device | models | count | specification |
-| - | - | - | - |
-| 3D printer | VOXELAB Aquila X2 | 1 | any printer that prints PLA would do | 
-| filament | PLA | - |  | 
 
 Optional:
 
@@ -44,16 +39,16 @@ Optional:
 
 <img src="https://github.com/SphericalCowww/ROS_leggedRobot_testBed/blob/main/powerSystemSharingGround.png" width="200"> 
 
-## Power System
+## Power system
 
   * Daisy chain no more than 3 servos to avoid delay
   * Powering the hubs using their SMPS DC jacks. Then use the molex/screw terminal as an output to power the RaspPi via a ~12V-to-5V DC-DC converter.
 
 <img src="https://github.com/SphericalCowww/ROS_leggedRobot_testBed/blob/main/powerSystem.png" width="500"> 
 
-# Running a single servo on ROS2
+# Running a Single Servo on ROS2
 
-### setting the servo IDs
+## Setting the servo IDs
 
 Connecting servo to U2D2 according to <a href="https://www.youtube.com/watch?v=FIj_NULYOKQ">YouTube</a>:
 
@@ -80,7 +75,9 @@ Can also test out the servo:
     # LED (top right toggle)
     # Torque (top right toggle) => set the value for motion (can select Velocity/Position mode)
 
-## Installing the <a href="https://github.com/ROBOTIS-GIT/DynamixelSDK">dynamixel-sdk</a> and  <a href="https://github.com/ROBOTIS-GIT/dynamixel-workbench">dynamixel-workbench</a>
+For the 12 servos, the IDs are set as 11, 12, 13, 21, 22, 23, 31, 32, 33, 41, 42, and 43.
+
+## Installing the <a href="https://github.com/ROBOTIS-GIT/DynamixelSDK">dynamixel-sdk</a> and <a href="https://github.com/ROBOTIS-GIT/dynamixel-workbench">dynamixel-workbench</a>
 
 Following <a href="https://github.com/SphericalCowww/ROS_init_practice">github</a> to install ROS. To install drivers for Dynamixel, 
 
