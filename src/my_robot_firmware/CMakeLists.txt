@@ -18,6 +18,15 @@ find_package(pluginlib REQUIRED)
 include_directories(include)
 
 ###########################################################################
+add_library(my_robot_hardware_interface SHARED
+  src/hardware_interface_my_robot_dynamixel_u2d2_xl430.cpp
+)
+ament_target_dependencies(my_robot_hardware_interface rclcpp rclcpp_lifecycle dynamixel_sdk dynamixel_workbench dynamixel_workbench_toolbox hardware_interface plugi    nlib)
+pluginlib_export_plugin_description_file(hardware_interface my_robot_hardware_interface.xml)
+install(TARGETS my_robot_hardware_interface
+  DESTINATION lib/${PROJECT_NAME}
+)
+
 add_library(cubic_doggo_hardware_interface SHARED
   src/hardware_interface_cubic_doggo_dynamixel_u2d2_xl430.cpp
 )
@@ -32,6 +41,7 @@ install(
   DESTINATION include
 ) 
 ament_export_libraries(
+    my_robot_hardware_interface
     cubic_doggo_hardware_interface
 )
 ament_export_dependencies(rclcpp rclcpp_lifecycle hardware_interface pluginlib)

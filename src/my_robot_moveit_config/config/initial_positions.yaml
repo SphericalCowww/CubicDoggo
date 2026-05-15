@@ -1,0 +1,6 @@
+# Default initial positions for my_robot's ros2_control fake system
+
+initial_positions:
+  servo1_servo1_padding: 3.14
+  servo2_servo2_padding: 3.14
+  servo3_calfFeet: 3.14
