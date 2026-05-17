@@ -166,25 +166,6 @@ Update to run the firmware with proper permissions to avoid latency:
 
 ## Running a single leg on ROS2
 
-### Testing the ros2_control and MoveIt
-
-Under ``ma_robot.ros2_control.xacro``, 
-   
-   * use ``<plugin>mock_components/GenericSystem</plugin>`` if just want rViz
-   * use ``<plugin>ma_robot_namespace::HardwareInterfaceU2D2_ma_robot</plugin>`` if want to control hardware
-    
-    colcon build
-    source install/setup.bash
-    ros2 launch my_robot_bringup ma_robot.with_commander.launch.py
-    ros2 topic info /arm_set_name
-    ros2 topic pub -1 /arm_set_named example_interfaces/msg/String "{data: "arm_pose1"}"
-    ros2 topic info /arm_set_joint
-    ros2 topic pub -1 /arm_set_joint example_interfaces/msg/Float64MultiArray "{data: [0.5, 0.5, 0.5, 0.5, 0.5, 0.5]}"
-    ros2 topic info /arm_set_pose
-    ros2 topic pub -1 /arm_set_pose my_robot_interface/msg/MaRobotArmPoseTarget "{x: 0.7, y: 0.0, z: 0.4, roll: 3.14, pitch: 0.0, yaw: 0.0, use_cartesian_path: false}"
-    ros2 topic info /gripper_set_open
-    ros2 topic pub -1 /gripper_set_open example_interfaces/msg/Bool "{data: false}"
-
 ### Launching URDF
 
 Then run the following:
@@ -217,6 +198,28 @@ Note that to move the motion wheel in rViz:
     # toggle: Approx IK Solutions
     # toggle if needed: MotionPlanning => Planned Path => Loop Animation
     # toggle if needed: Use Cartesian Path 
+
+### Testing the ros2_control and MoveIt
+
+Under ``CubicDoggo/src/my_robot_description/urdf/my_robot.ros2_control.xacro``, 
+   
+   * use ``<plugin>mock_components/GenericSystem</plugin>`` if just want rViz
+   * use ``<plugin>ma_robot_namespace::HardwareInterfaceU2D2_my_robot</plugin>`` if want to control hardware
+
+Then run:
+    
+    colcon build
+    source install/setup.bash
+    ros2 launch my_robot_bringup my_robot.with_lifecycle.launch.py
+    # on another terminal
+    ros2 topic info /arm_set_name
+    ros2 topic pub -1 /arm_set_named example_interfaces/msg/String "{data: "arm_pose1"}"
+    ros2 topic info /arm_set_joint
+    ros2 topic pub -1 /arm_set_joint example_interfaces/msg/Float64MultiArray "{data: [0.5, 0.5, 0.5, 0.5, 0.5, 0.5]}"
+    ros2 topic info /arm_set_pose
+    ros2 topic pub -1 /arm_set_pose my_robot_interface/msg/MaRobotArmPoseTarget "{x: 0.7, y: 0.0, z: 0.4, roll: 3.14, pitch: 0.0, yaw: 0.0, use_cartesian_path: false}"
+    ros2 topic info /gripper_set_open
+    ros2 topic pub -1 /gripper_set_open example_interfaces/msg/Bool "{data: false}"
 
 ### Launching with launch file:
 
