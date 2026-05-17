@@ -173,6 +173,12 @@ Update to run the firmware with proper permissions to avoid latency:
 
 ## Running a single leg on ROS2
 
+### Assembly
+
+Remember to twist the servo cables to reduce the signal interference from the power lines.
+
+<img src="https://github.com/SphericalCowww/CubicDoggo/blob/main/fig_leg0.png" width="200"><img src="https://github.com/SphericalCowww/CubicDoggo/blob/main/fig_leg1.png" width="300"><img src="https://github.com/SphericalCowww/CubicDoggo/blob/main/fig_leg2.png" width="250"><img src="https://github.com/SphericalCowww/CubicDoggo/blob/main/fig_leg3.png" width="200">
+
 ### Launching URDF
 
 Then run the following:
