@@ -99,14 +99,11 @@ To,
     #include <cstdlib>
     #include "dynamixel_workbench_toolbox/dynamixel_workbench.h"
 
-Then,
+Then connect U2D2 to the RaspPi USB port. To check if ROS2 sees the servos: 
 
     cd CubicDoggo
     colcon build
     source install/setup.bash
-
-Connect U2D2 to the RaspPi USB port. To check if ROS2 sees the servos: 
-
     sudo dmesg | tail -n 20
     # look for:
     ## usb 2-2: Detected FT232H
@@ -147,7 +144,7 @@ Update USB port latency to 1 ms. Note that this USB signal is delicate; use as s
 Update to run the firmware with proper permissions to avoid latency:
 
     # without sudo, we will see the following WARNING in ros2 launch:
-    ## [ros2_control_node-2] [WARN] [1766867979.090889912] [controller_manager]: Could not enable FIFO RT scheduling policy: with error number <1> (Operation not permitted). See [https://control.ros.org/master/doc/ros2_control/controller_manager/doc/userdoc.html] for details on how to enable realtime scheduling.
+    ## [ros2_control_node-2] [WARN] [1766867979.090889912] [controller_manager]: Could not enable FIFO RT scheduling policy: with error number <1> (Operation not permitted). See [https://control.ros.org/master/doc/ros2_control/controller_manager/doc/userdoc.html] for details on how to enable real-time scheduling.
     # with sudo, we can do the following:
     ## sudo bash -c "source /opt/ros/jazzy/setup.bash; source install/setup.bash; ros2 launch my_robot_bringup my_robot.with_commander.launch.py"
     # however, eventually we want to run without sudo in case it messes up with other permissions:
@@ -170,6 +167,7 @@ Update to run the firmware with proper permissions to avoid latency:
 
 Then run the following:
 
+    cd CubicDoggo
     colcon build
     source install/setup.bash
     ros2 launch my_robot_description my_robot.rviz.launch.xacro.py
@@ -182,6 +180,7 @@ Then run the following:
 
 ### Launching MoveIt2 demo:
 
+    cd CubicDoggo
     colcon build
     source install/setup.bash
     ros2 launch my_robot_moveit_config demo.launch.py
@@ -208,6 +207,7 @@ Under ``CubicDoggo/src/my_robot_description/urdf/my_robot.ros2_control.xacro``,
 
 Then run:
     
+    cd CubicDoggo
     colcon build
     source install/setup.bash
     ros2 launch my_robot_bringup my_robot.with_lifecycle.launch.py
@@ -223,7 +223,7 @@ Then run:
 
 ### Launching with launch file:
 
-    cd CubicDogg
+    cd CubicDoggo
     colcon build
     source install/setup.bash
     ros2 launch my_robot_bringup my_robot.launch.py
@@ -249,7 +249,7 @@ Under: ``CubicDoggo/src/my_robot_bringup/launch/cubic_doggo.with_lifecycle.launc
 
 Start the robot (skip launching rviz_node, joy_driver_node, or joy_controller_node if needed):
 
-    cd CubicDogg
+    cd CubicDoggo
     colcon build
     source install/setup.bash
     # comment in rvis node in CubicDoggo/src/my_robot_bringup/launch/cubic_doggo.with_lifecycle.launch.py
@@ -275,7 +275,10 @@ Check out all the gait options under ``CubicDoggo/src/my_robot_commander/src/cub
     # if no device found
     sudo usermod -aG input $USER
     sudo reboot
-    
+
+    cd CubicDoggo
+    colcon build
+    source install/setup.bash
     ros2 run joy joy_node
     # on another terminal
     ros2 run my_robot_controller cubic_doggo_joy_control
