@@ -23,7 +23,11 @@ The 3D printer model VOXELAB Aquila X2 is used, but as long as it prints PLA, it
 | DC-DC step-down convertor | Hailege <a href="https://www.amazon.de/Hailege-Module-Step-Down-Supply-Converter/dp/B07XFMMY1F">24V/12V to 5V/5A</a> | 1 | USB Port port to RaspPi,  DC 5.5mm x 2.5mm Male to battery | 
 | battery | ZYGY <a href="https://www.amazon.de/dp/B0BB6RMM5Q">11.1V 2000mAh</a> | 2 | They already include protection. Need Charger. Need adapters for: T-plug => XT60 Male => DC 5.5mm x 2.5mm Male | 
 | bearings | M3 bearing+<a href="https://www.amazon.de/dp/B01M2ZCLKX">spacer</a>, threaded rod, rod-end bearing | 8, 4, 4, 4 | rod length of 60mm to match the leg length; other dimensions can be accomodated by modifying the CAD |
-| bolts and nuts | | | M3 hardware is used throughout, except where required to accommodate the servos and electronic boards; use locknuts |
+| bolts and nuts | | | M3 screws are used throughout, except where required to accommodate the servos and electronic boards; use locknuts |
+
+Other than the M3 screw, one specific requirement is the 1.2cm M2 screw (bag on the left in the photo) for the servo, which is not provided by the DYNAMIXEL package (bag on the right). Any shorter, the connection is too fragile, and any longer, the servo will be stuck from the inside. The M2.5 screws are generally provided by the DYNAMIXEL package, but other electrical boards may need them too, such as the RaspPi.
+
+<img src="https://github.com/SphericalCowww/CubicDoggo/blob/main/fig_servo.png" width="400">
 
 Optional:
 
@@ -269,9 +273,15 @@ Start the robot (skip launching rviz_node, joy_driver_node, or joy_controller_no
     ros2 service call /leg_walk_toggle std_srvs/srv/SetBool "{data: true}"
     ros2 service call /leg_walk_toggle std_srvs/srv/SetBool "{data: false}"
 
-    
+Check out all the gait options under ``CubicDoggo/src/my_robot_commander/src/cubic_doggo_lifecycle.cpp``:
 
-Check out all the gait options under ``CubicDoggo/src/my_robot_commander/src/cubic_doggo_lifecycle.cpp``
+    # double maxVelScale = 1.0, maxAccScale = 1.0;
+    # int    waypoint_N     = 100;       // number of waypoints for each cycle,      default 100
+    # double waypoint_dt    = 0.01;      // second for each waypoint,                default 0.01
+    # double IK_bufferTime  = 0.10;      // time at end of cycle buffer for IK calc, default 0.10
+    # double swing_fraction = 0.50;      // creep < 0.25 < stable trot < 0.5 < trot
+    # double lift = 0.02, x_stride_max = 0.02, y_stride_max = 0.025, x_shift = 0.0, y_shift = 0.0;
+    # double x_stride = 0.0, y_stride = 0.0;
 
 ### Testing the joystick controller:
 
