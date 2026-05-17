@@ -1,6 +1,6 @@
 # Cubic Doggo: Homemade 12-DOF 4-Legged Robot Recipe
 
-<img src="https://github.com/SphericalCowww/ROS_Cubic_Doggo/blob/main/CubicDoggo.png" width="300"> 
+<img src="https://github.com/SphericalCowww/ROS_Cubic_Doggo/blob/main/CubicDoggo1.png" height="300"> <img src="https://github.com/SphericalCowww/ROS_Cubic_Doggo/blob/main/CubicDoggo2.png" height="300"> 
 
 **Building from scratch a walking robot dog with all commercial/3D-printed parts and ROS2 Jazzy!**
 
@@ -41,7 +41,7 @@ Optional:
   * Solder two <a href="https://emanual.robotis.com/docs/en/dxl/x/xl320/#connector-information">MOLEX 51065-0300</a> cables together to form a Y-wire, otherwise U2D2 doesn't have enough connectors
   * Optional: connect a wire between the 2 U2D2 power hubs such that they have shared ground. Then solder a capacitor at each end to the power rail. Careful about all the connection directions; otherwise, the whole power system can be severely damaged
 
-<img src="https://github.com/SphericalCowww/CubicDoggo/blob/main/fig_Ywire.png" width="200"> <img src="https://github.com/SphericalCowww/ROS_leggedRobot_testBed/blob/main/powerSystemSharingGround.png" width="200"> 
+<img src="https://github.com/SphericalCowww/CubicDoggo/blob/main/fig_Ywire.png" height="200"> <img src="https://github.com/SphericalCowww/ROS_leggedRobot_testBed/blob/main/powerSystemSharingGround.png" height="200"> 
 
 ### Power system
 
@@ -127,7 +127,7 @@ Check <a href="https://github.com/SphericalCowww/ROS_leggedRobot_testBed">ROS_le
 
 ### Setting the latency
 
-Update USB port latency to 1 ms. Note that this USB signal is delicate; use as short and high-quality a USB cable as possible.: 
+Update USB port latency to 1 ms. Note that this USB signal is delicate; use the shortest, highest-quality USB cable possible.: 
 
     lsusb
     # look for: Bus 002 Device 003: ID 0403:6014 Future Technology Devices International, Ltd FT232H Single HS USB-UART/FIFO IC
@@ -154,7 +154,7 @@ Update USB port latency to 1 ms. Note that this USB signal is delicate; use as s
 Update to run the firmware with proper permissions to avoid latency:
 
     # without sudo, we will see the following WARNING in ros2 launch:
-    ## [ros2_control_node-2] [WARN] [1766867979.090889912] [controller_manager]: Could not enable FIFO RT scheduling policy: with error number <1> (Operation not permitted). See [https://control.ros.org/master/doc/ros2_control/controller_manager/doc/userdoc.html] for details on how to enable real-time scheduling.
+    ## [ros2_control_node-2] [WARN] [1766867979.090889912] [controller_manager]: Could not enable FIFO RT scheduling policy: with error number <1> (Operation not permitted). See [https://control.ros.org/master/doc/ros2_control/controller_manager/doc/userdoc.html] for details on enabling real-time scheduling.
     # with sudo, we can do the following:
     ## sudo bash -c "source /opt/ros/jazzy/setup.bash; source install/setup.bash; ros2 launch my_robot_bringup my_robot.with_commander.launch.py"
     # however, eventually we want to run without sudo in case it messes up with other permissions:
@@ -173,15 +173,13 @@ Update to run the firmware with proper permissions to avoid latency:
 
 ## Running a single leg on ROS2
 
-### Assembly
+### Assembly and Launching URDF
 
 Remember to twist the servo cables to reduce the signal interference from the power lines.
 
-<img src="https://github.com/SphericalCowww/CubicDoggo/blob/main/fig_leg0.png" width="200"><img src="https://github.com/SphericalCowww/CubicDoggo/blob/main/fig_leg1.png" width="300"><img src="https://github.com/SphericalCowww/CubicDoggo/blob/main/fig_leg2.png" width="250"><img src="https://github.com/SphericalCowww/CubicDoggo/blob/main/fig_leg3.png" width="200">
+<img src="https://github.com/SphericalCowww/CubicDoggo/blob/main/fig_leg0.png" height="200"> <img src="https://github.com/SphericalCowww/CubicDoggo/blob/main/fig_leg1.png" height="200"> <img src="https://github.com/SphericalCowww/CubicDoggo/blob/main/fig_leg2.png" height="200"> <img src="https://github.com/SphericalCowww/CubicDoggo/blob/main/fig_leg3.png" height="200">
 
-### Launching URDF
-
-Then run the following:
+Run the following to view the moving parts:
 
     cd CubicDoggo
     colcon build
@@ -248,6 +246,17 @@ Then run:
     ## Planning => Goal State: pose1 => Plan => Execute
 
 ## Running full robot
+
+### Assembly and Launching URDF
+
+Run the following to view the moving parts:
+
+    cd CubicDoggo
+    colcon build
+    source install/setup.bash
+    ros2 launch my_robot_description cubic_doggo.rviz.launch.xacro.py
+
+Notice that the placement of the first servo is different between the front and back legs.
 
 ### Launching with commands
 
