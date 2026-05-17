@@ -46,6 +46,12 @@ Optional:
 
 <img src="https://github.com/SphericalCowww/ROS_leggedRobot_testBed/blob/main/powerSystem.png" width="500"> 
 
+### Tools used
+
+There are quite a few screws in difficult locations with the current design, which may require several tools for full assembly and repair in timely manner. The photo shows the tool used for this project.
+
+<img src="https://github.com/SphericalCowww/CubicDoggo/blob/main/fig_tools.png" width="400">
+
 ## Running a Single Servo on ROS2
 
 ### Setting the servo IDs
