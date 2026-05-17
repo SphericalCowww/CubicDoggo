@@ -403,7 +403,7 @@ private:
         double waypoint_dt    = 0.01;      // second for each waypoint,                default 0.01
         double IK_bufferTime  = 0.10;      // time at end of cycle buffer for IK calc, default 0.10
         double swing_fraction = 0.50;      // creep < 0.25 < stable trot < 0.5 < trot
-        double lift = 0.02, x_stride_max = 0.01, y_stride_max = 0.025, x_shift = 0.0, y_shift = 0.0;
+        double lift = 0.02, x_stride_max = 0.02, y_stride_max = 0.025, x_shift = 0.0, y_shift = 0.0;
         double x_stride = 0.0, y_stride = 0.0;
 
         all_legs_robot_model_ = all_legs_interface_->getRobotModel();

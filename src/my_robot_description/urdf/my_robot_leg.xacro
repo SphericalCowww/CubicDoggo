@@ -55,25 +55,25 @@
     <link name="servo1_holder">
         <visual>
             <geometry>
-                <mesh filename="package://my_robot_description/mesh/CADv1/XL-430holderBasic.stl" scale="0.001 0.001 0.001"/>
+                <mesh filename="package://my_robot_description/mesh/CADv1/XL430holderBasic.stl" scale="0.001 0.001 0.001"/>
             </geometry>
             <material name="white"/>
             <origin xyz="0 0 0" rpy="0 0 ${urdf_pi/2}"/>
         </visual>
         <collision>
             <geometry>
-                <box size="0.037 0.032 0.014"/>
+                <box size="0.037 0.037 0.014"/>
             </geometry>
             <origin xyz="0 0 0.007" rpy="0 0 ${urdf_pi/2}"/>
         </collision>
-        <xacro:box_inertia m="0.0098" x="0.037" y="0.032" z="0.014" o_xyz="0 0 0.007" o_rpy="0 0 ${urdf_pi/2}"/>
+        <xacro:box_inertia m="0.0098" x="0.037" y="0.037" z="0.014" o_xyz="0 0 0.007" o_rpy="0 0 ${urdf_pi/2}"/>
     </link> 
     <joint name="main_board_servo1_holder" type="fixed">
         <parent link="main_board"/>
         <child  link="servo1_holder"/>
         <origin xyz="-0.050 0.018 0.004" rpy="0 0 0"/>
-    </joint>
-    
+    </joint>   
+ 
     <link name="servo1">
         <visual>
             <geometry>
@@ -117,7 +117,7 @@
         <child  link="servo1_padding"/>
         <origin xyz="0 ${-servo_z/2-0.002} ${0.01+0.0025/2}" rpy="0 0 0"/>
         <axis xyz="0 -1 0"/>
-        <limit effort="1000.0" velocity="20.0" lower="2.5" upper="4.0"/>
+        <limit effort="1000.0" velocity="50.0" lower="${urdf_pi - urdf_pi/3}" upper="${urdf_pi + urdf_pi/3}"/>
         <dynamics friction="0.05" damping="0.1"/>
     </joint>
 
@@ -125,18 +125,18 @@
     <link name="servo2_holder">
         <visual>
             <geometry>
-                <mesh filename="package://my_robot_description/mesh/CADv1/XL-430holderBasic.stl" scale="0.001 0.001 0.001"/>
+                <mesh filename="package://my_robot_description/mesh/CADv1/XL430holderBasic.stl" scale="0.001 0.001 0.001"/>
             </geometry>
             <material name="white"/>
             <origin xyz="0 0 0" rpy="${urdf_pi/2} 0 0"/>
         </visual>
         <collision>
             <geometry>
-                <box size="0.037 0.032 0.014"/>
+                <box size="0.037 0.037 0.014"/>
             </geometry>
             <origin xyz="0 -0.007 0" rpy="${urdf_pi/2} 0 0"/>
         </collision>
-        <xacro:box_inertia m="0.0098" x="0.037" y="0.032" z="0.014" o_xyz="0 -0.007 0" o_rpy="${urdf_pi/2} 0 0"/>
+        <xacro:box_inertia m="0.0098" x="0.037" y="0.037" z="0.014" o_xyz="0 -0.007 0" o_rpy="${urdf_pi/2} 0 0"/>
     </link> 
     <joint name="base_link_servo2_holder" type="fixed">
         <parent link="servo1_padding"/>
@@ -158,7 +158,8 @@
             </geometry>
             <origin xyz="0 ${-servo_y/2} 0" rpy="0 ${urdf_pi/2} 0"/>
         </collision>
-        <xacro:box_inertia m="0.0572" x="${servo_x}" y="${servo_y}" z="${servo_z}" o_xyz="0 ${-servo_y/2} 0" o_rpy="0 ${urdf_pi/2} 0"/>
+        <xacro:box_inertia m="0.0572" x="${servo_x}" y="${servo_y}" z="${servo_z}" 
+                           o_xyz="0 ${-servo_y/2} 0" o_rpy="0 ${urdf_pi/2} 0"/>
     </link> 
     <joint name="servo2_holder_servo2" type="fixed">
         <parent link="servo2_holder"/>
@@ -187,7 +188,8 @@
         <child  link="servo2_padding"/>
         <origin xyz="${servo_z/2+0.002} -0.03525 0" rpy="0 0 0"/>
         <axis xyz="1 0 0"/>
-        <limit effort="1000.0" velocity="20.0" lower="2.0" upper="4.0"/>
+        <limit effort="1000.0" velocity="50.0" lower="${urdf_pi - 2*urdf_pi/6 - urdf_pi/6}" 
+                                               upper="${urdf_pi + 2*urdf_pi/6 - urdf_pi/6}"/>
         <dynamics friction="0.05" damping="0.1"/>
     </joint>
 
@@ -206,7 +208,8 @@
             </geometry>
             <origin xyz="0.003 -0.016 0" rpy="${-urdf_pi/2} 0 ${-urdf_pi/2}"/>
         </collision>
-        <xacro:box_inertia m="0.0085" x="0.040" y="0.032" z="0.006" o_xyz="0.003 -0.016 0" o_rpy="${-urdf_pi/2} 0 ${-urdf_pi/2}"/>
+        <xacro:box_inertia m="0.0085" x="0.032" y="0.040" z="0.006" 
+                           o_xyz="0.003 -0.016 0" o_rpy="${-urdf_pi/2} 0 ${-urdf_pi/2}"/>
     </link>
     <joint name="servo2_padding_inner_thigh" type="fixed">
         <parent link="servo2_padding"/>
@@ -220,15 +223,16 @@
                 <mesh filename="package://my_robot_description/mesh/CADv1/thighOuter.stl" scale="0.001 0.001 0.001"/>
             </geometry>
             <material name="blue"/>
-            <origin xyz="0 0 0" rpy="${-urdf_pi/2} 0 ${-urdf_pi/2}"/>
+            <origin xyz="0 0 0" rpy="${-urdf_pi/2} ${urdf_pi/2-urdf_pi/2} ${-urdf_pi/2}"/>
         </visual>
         <collision>
             <geometry>
-                <box size="0.110 0.040 0.006"/>
+                <box size="0.040 0.032 0.006"/>
             </geometry>
-            <origin xyz="0.003 -0.055 0" rpy="${-urdf_pi/2} 0 ${-urdf_pi/2}"/>
+            <origin xyz="0.003 -0.06 0" rpy="${-urdf_pi/2} ${urdf_pi/2-urdf_pi/2} ${-urdf_pi/2}"/>
         </collision>
-        <xacro:box_inertia m="0.0113" x="0.040" y="0.032" z="0.006" o_xyz="0.003 -0.055 0" o_rpy="${-urdf_pi/2} 0 ${-urdf_pi/2}"/>
+        <xacro:box_inertia m="0.0113" x="0.040" y="0.032" z="0.006" 
+                           o_xyz="0.003 -0.0475 0" o_rpy="${-urdf_pi/2} ${urdf_pi/2-urdf_pi/2} ${-urdf_pi/2}"/>
     </link>
     <joint name="inner_thigh_outer_thigh" type="fixed">
         <parent link="inner_thigh"/>
@@ -265,24 +269,24 @@
                 <mesh filename="package://my_robot_description/mesh/CADv1/calfFeet.stl" scale="0.001 0.001 0.001"/>
             </geometry>
             <material name="purple"/>
-            <origin xyz="-0.004 -0.008 0.035" rpy="0 ${urdf_pi/2} 0"/>
+            <origin xyz="${-0.004} -0.008 0.038" rpy="0 ${urdf_pi/2} 0"/>
         </visual>
         <collision>
             <geometry>
-                <box size="0.150 0.016 0.004"/>
+                <box size="0.110 0.016 0.004"/>
             </geometry>
-            <origin xyz="-0.002 ${-0.008+0.008} ${0.035-0.080}" rpy="0 ${-urdf_pi/2} 0"/>
+            <origin xyz="0 ${-0.008+0.008} ${0.038-0.050}" rpy="0 ${-urdf_pi/2} 0"/>
         </collision>
-        <xacro:box_inertia m="${0.0251-0.0080}" x="0.150" y="0.016" z="0.004" 
-                           o_xyz="${-servo_z/2-0.002-0.0025-0.002} ${-0.008+0.008} ${0.035-0.080}" o_rpy="0 ${-urdf_pi/2} 0"/>
+        <xacro:box_inertia m="${0.0251-0.0080}" x="0.110" y="0.016" z="0.004" 
+                           o_xyz="0 ${-0.008+0.008} ${0.035-0.050}" o_rpy="0 ${-urdf_pi/2} 0"/>
     </link>
     <joint name="servo3_calfFeet" type="revolute">
         <parent link="servo3"/>
         <child  link="calfFeet"/>
-        <origin xyz="${-servo_z/2-0.002-0.0025} ${-0.101+0.004} 0" rpy="0 0 0"/>
+        <origin xyz="${-servo_z/2-0.002-0.0025} ${-0.086+0.004} 0" rpy="0 0 0"/>
         <axis xyz="-1 0 0"/>
-        <limit effort="1000.0" velocity="20.0" lower="2.0" upper="4.0"/>
-        <dynamics friction="0.05" damping="0.1"/>
+        <limit effort="1000.0" velocity="50.0" lower="${5*urdf_pi/8}" upper="${11*urdf_pi/8}"/>
+        <dynamics friction="0.0128" damping="0.1"/>
     </joint>
 
     <link name="calfJoint">
@@ -295,21 +299,21 @@
         </visual>
         <collision>
             <geometry>
-                <box size="0.022 0.051 0.0065"/>
+                <box size="0.022 0.053 0.007"/>
             </geometry>
-            <origin xyz="-0.0005 0 0.0145" rpy="${urdf_pi/2} 0 ${-urdf_pi/2}"/>
+            <origin xyz="-0.0005 0 0.0155" rpy="${urdf_pi/2} 0 ${-urdf_pi/2}"/>
         </collision>
-        <xacro:box_inertia m="${0.0047+0.0015}" x="0.022" y="0.051" z="0.0065" 
-                           o_xyz="-0.0005 0 0.0145" o_rpy="${urdf_pi/2} 0 ${-urdf_pi/2}"/>
+        <xacro:box_inertia m="${0.0047+0.0015}" x="0.022" y="0.053" z="0.007" 
+                           o_xyz="-0.0005 0 0.0155" o_rpy="${urdf_pi/2} 0 ${-urdf_pi/2}"/>
     </link>
     <joint name="servo3_calfJoint" type="revolute">
         <parent link="servo3"/>
         <child  link="calfJoint"/>
-        <origin xyz="${-servo_z/2-0.002-0.0025} ${-0.01-0.0025/2} 0" rpy="0 0 0"/>
+        <origin xyz="${-servo_z/2-0.002-0.0025} ${-0.01-0.0025/2-0.001} 0" rpy="0 0 0"/>
         <axis xyz="-1 0 0"/>
         <mimic joint="servo3_calfFeet" multiplier="1.0" offset="0.0"/>
-        <limit effort="1000.0" velocity="20.0" lower="${5*urdf_pi/8}" upper="${11*urdf_pi/8}"/>
-        <dynamics friction="0.05" damping="0.1"/>
+        <limit effort="1000.0" velocity="50.0" lower="${5*urdf_pi/8}" upper="${11*urdf_pi/8}"/>
+        <dynamics friction="0.0212" damping="0.1"/>
     </joint>
 
     <link name="calfSphere">
@@ -331,7 +335,7 @@
     <joint name="calfFeet_calfSphere" type="fixed">
         <parent link="calfFeet"/>
         <child  link="calfSphere"/>
-        <origin xyz="-0.002 0.004 ${-0.150+0.035}" rpy="0 0 0"/>
+        <origin xyz="0 0.004 ${-0.105+0.035}" rpy="0 0 0"/>
     </joint>
 </robot>
 <!-- ================================================================================================================================== -->
