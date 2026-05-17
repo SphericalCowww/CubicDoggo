@@ -116,6 +116,8 @@ Connect U2D2 to the RaspPi USB port. To check if ROS2 sees the servos:
     ros2 run my_toolbox_dynamixel_workbench model_scan /dev/ttyUSB0 2000000
     ros2 run my_toolbox_dynamixel_workbench position /dev/ttyUSB0 2000000 11 0.5
 
+Check <a href="https://github.com/SphericalCowww/ROS_leggedRobot_testBed">ROS_leggedRobot_testBed GitHub</a>, specifically <a href="https://github.com/SphericalCowww/ROS_leggedRobot_testBed/blob/main/src/my_robot_firmware/src/testRaspPi5_dynamixel_u2d2_channel0_xl430.cpp">firmware code</a> for more single servo application. However, do NOT run it on a connected robot. 
+
 ### Setting the latency
 
 Update USB port latency to 1 ms. Note that this USB signal is delicate; use as short and high-quality a USB cable as possible.: 
