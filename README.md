@@ -212,14 +212,13 @@ Then run:
     source install/setup.bash
     ros2 launch my_robot_bringup my_robot.with_lifecycle.launch.py
     # on another terminal
-    ros2 topic info /arm_set_name
-    ros2 topic pub -1 /arm_set_named example_interfaces/msg/String "{data: "arm_pose1"}"
-    ros2 topic info /arm_set_joint
-    ros2 topic pub -1 /arm_set_joint example_interfaces/msg/Float64MultiArray "{data: [0.5, 0.5, 0.5, 0.5, 0.5, 0.5]}"
-    ros2 topic info /arm_set_pose
-    ros2 topic pub -1 /arm_set_pose my_robot_interface/msg/MaRobotArmPoseTarget "{x: 0.7, y: 0.0, z: 0.4, roll: 3.14, pitch: 0.0, yaw: 0.0, use_cartesian_path: false}"
-    ros2 topic info /gripper_set_open
-    ros2 topic pub -1 /gripper_set_open example_interfaces/msg/Bool "{data: false}"
+    ros2 topic pub -1 /leg1_set_named example_interfaces/msg/String "{data: "pose1"}"
+    ros2 topic pub -1 /leg1_set_joint example_interfaces/msg/Float64MultiArray "{data: [3.14, 3.14, 3.14]}"
+    ros2 topic pub -1 /leg1_set_pose my_robot_interface/msg/MyRobotLeg1PoseTarget "{x: -0.092, y: 0.053, z: 0.135, use_cartesian_path: false}" 
+    ros2 service call /leg1_walk_toggle std_srvs/srv/SetBool "{data: true}"     # IK very easy to fail
+    ros2 service call /leg1_walk_toggle std_srvs/srv/SetBool "{data: false}"
+    ros2 lifecycle set /my_robot_lifecycle deactivate
+    ros2 lifecycle set /my_robot_lifecycle shutdown
 
 ### Launching with launch file:
 
@@ -263,6 +262,8 @@ Start the robot (skip launching rviz_node, joy_driver_node, or joy_controller_no
     ros2 topic pub -1 /leg_set_pose my_robot_interface/msg/CubicDoggoLegPoseTarget "{leg_index: 0, x: -0.092, y: 0.053, z: 0.135}" 
     ros2 service call /leg_walk_toggle std_srvs/srv/SetBool "{data: true}"
     ros2 service call /leg_walk_toggle std_srvs/srv/SetBool "{data: false}"
+
+    
 
 Check out all the gait options under ``CubicDoggo/src/my_robot_commander/src/cubic_doggo_lifecycle.cpp``
 
