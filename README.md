@@ -41,20 +41,20 @@ Optional:
   * Solder two <a href="https://emanual.robotis.com/docs/en/dxl/x/xl320/#connector-information">MOLEX 51065-0300</a> cables together to form a Y-wire, otherwise U2D2 doesn't have enough connectors
   * Optional: connect a wire between the 2 U2D2 power hubs such that they have shared ground. Then solder a capacitor at each end to the power rail. Careful about all the connection directions; otherwise, the whole power system can be severely damaged
 
-<img src="https://github.com/SphericalCowww/CubicDoggo/blob/main/fig_Ywire.png" height="200"> <img src="https://github.com/SphericalCowww/ROS_leggedRobot_testBed/blob/main/powerSystemSharingGround.png" height="200"> 
+<img src="https://github.com/SphericalCowww/CubicDoggo/blob/main/fig_Ywire.png" height="100"> <img src="https://github.com/SphericalCowww/ROS_leggedRobot_testBed/blob/main/powerSystemSharingGround.png" height="100"> 
 
 ### Power system
 
   * Daisy chain no more than 3 servos to avoid delay
   * Powering the hubs using their SMPS DC jacks. Then use the molex/screw terminal as an output to power the RaspPi via a ~12V-to-5V DC-DC converter.
 
-<img src="https://github.com/SphericalCowww/ROS_leggedRobot_testBed/blob/main/powerSystem.png" width="500"> 
+<img src="https://github.com/SphericalCowww/ROS_leggedRobot_testBed/blob/main/powerSystem.png" height="400"> 
 
 ### Tools used
 
 There are quite a few screws in difficult locations with the current design, which may require several tools for full assembly and repair in timely manner. The photo shows the tool used for this project.
 
-<img src="https://github.com/SphericalCowww/CubicDoggo/blob/main/fig_tools.png" width="400">
+<img src="https://github.com/SphericalCowww/CubicDoggo/blob/main/fig_tools.png" height="100">
 
 ## Running a Single Servo on ROS2
 
@@ -62,7 +62,7 @@ There are quite a few screws in difficult locations with the current design, whi
 
 Connecting servo to U2D2 according to <a href="https://www.youtube.com/watch?v=FIj_NULYOKQ">YouTube</a>:
 
-<img src="https://github.com/SphericalCowww/ROS_leggedRobot_testBed/blob/main/basicConnection_DYNAMIXEL.png" width="200">
+<img src="https://github.com/SphericalCowww/ROS_leggedRobot_testBed/blob/main/basicConnection_DYNAMIXEL.png" width="300">
 
 Use the following App <a href="https://emanual.robotis.com/docs/en/software/dynamixel/dynamixel_wizard2/">DYNAMIXEL Wizard 2.0</a> to change the servo ID (default 1) to, say, ID 10. Note that if any of the servos have the same ID, they will NOT show up in the scan. The servos also all initially come with an ID of 1, so they must be connected one by one to U2D2 to change their IDs accordingly.
 
@@ -175,7 +175,7 @@ Update to run the firmware with proper permissions to avoid latency:
 
 ### Assembly and Launching URDF
 
-Remember to twist the servo cables to reduce the signal interference from the power lines.
+The double-bearing design will need a spacer in between. A long M3 screw is used to join the 2 bearing and connect with a locknut on the other side. Also, make sure the linkage rods are of the same length after installing the rod bearings. Finally, remember to twist the servo cables to reduce the signal interference from the power lines.
 
 <img src="https://github.com/SphericalCowww/CubicDoggo/blob/main/fig_leg0.png" height="200"> <img src="https://github.com/SphericalCowww/CubicDoggo/blob/main/fig_leg1.png" height="200"> <img src="https://github.com/SphericalCowww/CubicDoggo/blob/main/fig_leg2.png" height="200"> <img src="https://github.com/SphericalCowww/CubicDoggo/blob/main/fig_leg3.png" height="200">
 
