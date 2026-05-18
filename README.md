@@ -249,6 +249,10 @@ Then run:
 
 ### Assembly and Launching URDF
 
+<img src="https://github.com/SphericalCowww/ROS_Cubic_Doggo/blob/main/CubicDoggo3.png" height="200"> <img src="https://github.com/SphericalCowww/ROS_Cubic_Doggo/blob/main/CubicDoggo4.png" height="200"> <img src="https://github.com/SphericalCowww/ROS_Cubic_Doggo/blob/main/CubicDoggo5.png" height="200"> <img 
+src="https://github.com/SphericalCowww/ROS_Cubic_Doggo/blob/main/CubicDoggo6.png" height="200"> <img 
+src="https://github.com/SphericalCowww/ROS_Cubic_Doggo/blob/main/CubicDoggo7.png" height="200"> 
+
 Run the following to view the moving parts:
 
     cd CubicDoggo
@@ -347,7 +351,7 @@ For the low RaspPi power alarm, it's set by the rasp_pi_peripheral_node:
 
 ## Next directions
 
-- Cubic Doggo MKII: strengthen the 2nd servo holding design, test with PLA+ (less likely to crack), test with STS-3215 (high torque, cheaper, but harder to develop), and use a Bluetooth controller
+- Cubic Doggo MKII: strengthen the 2nd servo holding design (and perhaps to make the overall design easier to assemble), test with PLA+ (less likely to crack), test with STS-3215 (high torque, cheaper, but harder to develop), and use a Bluetooth controller
 - Cubic Doggo <a href="https://github.com/chvmp/champ">CHAMP</a>: adapting IMU, and checking the compatibility with the CHAMP framework
 - Cubic Doggo RL: walk gait trained by the RL using whatever open software available
 
