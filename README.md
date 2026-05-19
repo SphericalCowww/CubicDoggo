@@ -351,7 +351,7 @@ For the low RaspPi power alarm, it's set by the rasp_pi_peripheral_node:
 
 ## Next directions
 
-- Cubic Doggo MKII: strengthen the 2nd servo holding design (and perhaps to make the overall design easier to assemble), test with PLA+ (less likely to crack), test with STS-3215 (high torque, cheaper, but harder to develop), and use a Bluetooth controller
+- Cubic Doggo MKII: strengthen the 2nd servo holding design (and perhaps to make the overall design easier to assemble), applying lockwasher wherever locknuts are not available, test with PLA+ (less likely to crack), test with ST-3215-C018 (higher torque, cheaper, but harder to develop), and use a Bluetooth controller
 - Cubic Doggo <a href="https://github.com/chvmp/champ">CHAMP</a>: adapting IMU, and checking the compatibility with the CHAMP framework
 - Cubic Doggo RL: walk gait trained by the RL using whatever open software available
 
