@@ -23,7 +23,7 @@ The 3D printer model VOXELAB Aquila X2 is used, but as long as it prints PLA, it
 | USB communication interface | DYNAMIXEL <a href="https://emanual.robotis.com/docs/en/parts/interface/u2d2/">U2D2</a> | 1 | Can control 12 servo in daisy chain if properly powered |
 | communication/power hub | DYNAMIXEL <a href="https://emanual.robotis.com/docs/en/parts/interface/u2d2_power_hub/">U2D2 power hub board</a> | 2 | Operating voltage	3.5-24V withg a maximum current	of 10A |
 | onboard computer | Raspberry Pi 5 | 1 | For running just IK, a small RAM is sufficient; Pi 4 could be good enough as long as ROS2 Jazzy can be installed | 
-| DC-DC step-down convertor | Hailege <a href="https://www.amazon.de/Hailege-Module-Step-Down-Supply-Converter/dp/B07XFMMY1F">24V/12V to 5V/5A</a> | 1 | USB Port port to RaspPi,  DC 5.5mm x 2.5mm Male to battery | 
+| DC-DC step-down converter | Hailege <a href="https://www.amazon.de/Hailege-Module-Step-Down-Supply-Converter/dp/B07XFMMY1F">24V/12V to 5V/5A</a> | 1 | USB Port port to RaspPi,  DC 5.5mm x 2.5mm Male to battery | 
 | battery | ZYGY <a href="https://www.amazon.de/dp/B0BB6RMM5Q">11.1V 2000mAh</a> | 2 | They already include protection. Need Charger. Need adapters for: T-plug => XT60 Male => DC 5.5mm x 2.5mm Male | 
 | bearings | M3 bearing+<a href="https://www.amazon.de/dp/B01M2ZCLKX">spacer</a>, threaded rod, rod-end bearing | 8, 4, 4, 4 | rod length of 60mm to match the leg length; other dimensions can be accomodated by modifying the CAD |
 | bolts and nuts | | | M3 screws are used throughout, except where required to accommodate the servos and electronic boards; use locknuts |
@@ -42,20 +42,21 @@ Optional:
 ### Special soldering requirements
 
   * Solder two <a href="https://emanual.robotis.com/docs/en/dxl/x/xl320/#connector-information">MOLEX 51065-0300</a> cables together to form a Y-wire, otherwise U2D2 doesn't have enough connectors
-  * Optional: connect a wire between the 2 U2D2 power hubs such that they have shared ground. Then solder a capacitor at each end to the power rail. Careful about all the connection directions; otherwise, the whole power system can be severely damaged
+  * Optional: connect a wire between the 2 U2D2 power hubs such that they have shared ground. Then solder a capacitor at each end to the power rail. Be careful about all the connection directions; otherwise, the whole power system can be severely damaged
 
 <img src="https://github.com/SphericalCowww/CubicDoggo/blob/main/fig_Ywire.png" height="100"> <img src="https://github.com/SphericalCowww/ROS_leggedRobot_testBed/blob/main/powerSystemSharingGround.png" height="100"> 
 
 ### Power system
 
   * Daisy chain no more than 3 servos to avoid delay
-  * Powering the hubs using their SMPS DC jacks. Then use the molex/screw terminal as an output to power the RaspPi via a ~12V-to-5V DC-DC converter.
+  * Powering the hubs using their SMPS DC jacks. Then use the molex/screw terminal as an output to power the RaspPi via a ~12V-to-5V DC-DC converter
+  * When powering the RaspPi with a DC-DC step-down converter, don't forget to put a kapton tape to insulate the two boards
 
 <img src="https://github.com/SphericalCowww/ROS_leggedRobot_testBed/blob/main/powerSystem.png" height="400"> 
 
 ### Tools used
 
-There are quite a few screws in difficult locations with the current design, which may require several tools for full assembly and repair in timely manner. The photo shows the tool used for this project.
+There are quite a few screws in difficult locations with the current design, which may require several tools for full assembly and repair in a timely manner. The photo shows the tool used for this project.
 
 <img src="https://github.com/SphericalCowww/CubicDoggo/blob/main/fig_tools.png" height="100">
 
@@ -354,9 +355,9 @@ For the low RaspPi power alarm, it's set by the rasp_pi_peripheral_node:
 
 ## Next directions
 
-- Cubic Doggo MKII: strengthen the 2nd servo holding design (and perhaps to make the overall design easier to assemble), applying lockwasher wherever locknuts are not available, test with PLA+ (less likely to crack), test with ST-3215-C018 (higher torque, cheaper, but harder to develop), and use a Bluetooth controller
-- Cubic Doggo <a href="https://github.com/chvmp/champ">CHAMP</a>: adapting IMU, and checking the compatibility with the CHAMP framework
-- Cubic Doggo RL: walk gait trained by the RL using whatever open software available
+- <a href="https://github.com/SphericalCowww/CubicDoggo_06R">Cubic Doggo 06R, High Mobility</a>: mechanical improvement and IMU adaptation
+- <a href="https://github.com/SphericalCowww/CubicDoggo_07B">Cubic Doggo 07B, Wouf</a>: ST-3215-C018 servo adaptation (higher torque, cheaper, but harder to develop)
+- Cubic Doggo 06Z: test bed for simulation and AI reinforcement learning
 
 ## Acknowledgement
 
