@@ -58,7 +58,7 @@ Optional:
 
 There are quite a few screws in difficult locations with the current design, which may require several tools for full assembly and repair in a timely manner. The photo shows the tool used for this project.
 
-<img src="https://github.com/SphericalCowww/CubicDoggo/blob/main/fig_tools.png" height="100">
+<img src="https://github.com/SphericalCowww/CubicDoggo/blob/main/fig_tools.png" height="200">
 
 ## Running a Single Servo on ROS2
 
