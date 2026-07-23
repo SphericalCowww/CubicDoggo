@@ -104,15 +104,6 @@ Clone this repository,
     git clone https://github.com/SphericalCowww/CubicDoggo.git
     cd CubicDoggo
 
-Then copy <a href="https://github.com/ROBOTIS-GIT/dynamixel-workbench/tree/main/dynamixel_workbench_toolbox/examples/src">src</a> directly under ``CubicDoggo/src/my_toolbox_dynamixel_workbench``. And for every ``.cpp`` file, change the following line:
-
-    #include <DynamixelWorkbench.h>
-
-To, 
-
-    #include <cstdlib>
-    #include "dynamixel_workbench_toolbox/dynamixel_workbench.h"
-
 Then connect U2D2 to the RaspPi USB port. To check if ROS2 sees the servos: 
 
     cd CubicDoggo
@@ -359,6 +350,8 @@ For the low RaspPi power alarm, it's set by the rasp_pi_peripheral_node:
 - <a href="https://github.com/SphericalCowww/CubicDoggo_07B">Cubic Doggo 07B, Wouf</a>: ST-3215-C018 servo adaptation (higher torque, cheaper, but harder to develop)
 - Cubic Doggo 06Z, Neuralcommu: AI and simulation testbed for reinforcement learning
 
-## Acknowledgement
+## Acknowledgements
 
-- Thank my second brother, who is a mechanical engineer, for advising me to use the locknuts, all-directional bearings, and battery for RC boats, as well as buying me a bunch of screws for cheap. 
+- Some utility programs are adapted from the ROBOTIS DYNAMIXEL Workbench examples: https://github.com/ROBOTIS-GIT/dynamixel-workbench/tree/main/dynamixel_workbench_toolbox/examples/src. These files remain licensed under the Apache License 2.0. Modifications are documented in the source files.
+
+- Thanks to my second brother, who is a mechanical engineer, for advising me to use the locknuts, all-directional bearings, and battery for RC boats, as well as buying me a bunch of screws for cheap. 
