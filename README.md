@@ -28,7 +28,7 @@ The 3D printer model VOXELAB Aquila X2 is used, but as long as it prints PLA, it
 | bearings | M3 bearing+<a href="https://www.amazon.de/dp/B01M2ZCLKX">spacer</a>, threaded rod, rod-end bearing | 8, 4, 4, 4 | rod length of 60mm to match the leg length; other dimensions can be accomodated by modifying the CAD |
 | bolts and nuts | | | M3 screws are used throughout, except where required to accommodate the servos and electronic boards; use locknuts |
 
-Other than the M3 screw, one specific requirement is the 1.2cm M2 screw (bag on the left in the photo) for the servo, which is not provided by the DYNAMIXEL package (bag on the right). Any shorter, the connection is too fragile, and any longer, the servo will be stuck from the inside. The M2.5 screws are generally provided by the DYNAMIXEL package, but other electrical boards may need them too, such as the RaspPi.
+Other than the M3 screw, one specific requirement is the 12mm M2 screw (bag on the left in the photo) for the servo, which is not provided by the DYNAMIXEL package (bag on the right). Any shorter, the connection is too fragile, and any longer, the servo will be stuck from the inside. The M2.5 screws are generally provided by the DYNAMIXEL package, but other electrical boards may need them too, such as the RaspPi.
 
 <img src="https://github.com/SphericalCowww/CubicDoggo/blob/main/fig_servo.png" width="400">
 
