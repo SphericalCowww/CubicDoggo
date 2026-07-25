@@ -346,9 +346,9 @@ For the low RaspPi power alarm, it's set by the rasp_pi_peripheral_node:
 
 ## Next directions
 
-- <a href="https://github.com/SphericalCowww/CubicDoggo_06R">Cubic Doggo 06R, High Mobility</a>: mechanical improvement and IMU adaptation
-- <a href="https://github.com/SphericalCowww/CubicDoggo_07B">Cubic Doggo 07B, Wouf</a>: ST-3215-C018 servo adaptation (higher torque, cheaper, but harder to develop)
-- Cubic Doggo 06Z, Neucommu: AI and simulation testbed for reinforcement learning
+- <a href="https://github.com/SphericalCowww/CubicDoggo_06R">Cubic Doggo 06R High Mobility</a>: mechanical improvement and IMU adaptation
+- <a href="https://github.com/SphericalCowww/CubicDoggo_07B">Cubic Doggo 07B Wouf</a>: ST-3215-C018 servo adaptation (higher torque, cheaper, but harder to develop)
+- <a href="https://github.com/SphericalCowww/CubicDoggo_06Z">Cubic Doggo 06Z Neucommu</a>: AI and simulation testbed for reinforcement learning
 
 ## Acknowledgements
 
