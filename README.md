@@ -207,7 +207,9 @@ Note that to move the motion wheel in rViz:
     # toggle if needed: MotionPlanning => Planned Path => Loop Animation
     # toggle if needed: Use Cartesian Path 
 
-### Testing the ros2_control and MoveIt
+If want to set up MoveIt2 from the beginning, check <a href="https://github.com/SphericalCowww/ROS_leggedRobot_testBed">GitHub</a> with ``moveit_setup_assistant``.
+
+### Testing the ros2_control and MoveIt2
 
 Under ``CubicDoggo/src/my_robot_description/urdf/my_robot.ros2_control.xacro``, 
    
