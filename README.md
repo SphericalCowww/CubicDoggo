@@ -6,7 +6,7 @@
 
 Demos: derived from (<a href="https://github.com/SphericalCowww/ROS_leggedRobot_testBed">GitHub</a>/<a href="https://www.reddit.com/r/robotics/comments/1rouerc/first_time_building_a_hobbyist_robot_from_scratch/">Reddit</a>), upgrade in center of mass (<a href="https://www.reddit.com/r/ROS/comments/1roiee3/i_built_a_4legged_12dof_robot_dog_using_ros_2_i/">Reddit</a>), upgrade in walk gait (<a href="https://www.reddit.com/r/ROS/comments/1t8g1my/cubic_doggo_update_phew_it_finally_walks_with/">Reddit</a>), incorporate direction-turning in walk gait (<a href="https://www.reddit.com/r/robotics/comments/1tghftd/cubic_doggo_full_github_record_it_can_now_walk/">Reddit</a>/<a href="https://www.reddit.com/r/ROS/comments/1tghjte/cubic_doggo_full_github_record_it_can_now_walk/">Reddit</a>)
 
-Overview, thanks to the Blue Robe AI channel <a href="https://www.youtube.com/watch?v=N3qaMB3oIC4">YouTube</a>.
+Overview: thanks to the Blue Robe AI channel <a href="https://www.youtube.com/watch?v=N3qaMB3oIC4">YouTube</a>.
 
 
 ## Ingredients
@@ -48,8 +48,8 @@ Optional:
 
 ### Power system
 
-  * Daisy chain no more than 3 servos to avoid delay
-  * Powering the hubs using their SMPS DC jacks. Then use the molex/screw terminal as an output to power the RaspPi via a ~12V-to-5V DC-DC converter
+  * Daisy-chain no more than 3 servos to avoid delay
+  * Power the hubs using their SMPS DC jacks. Then use the molex/screw terminal as an output to power the RaspPi via a ~12V-to-5V DC-DC converter
   * When powering the RaspPi with a DC-DC step-down converter, don't forget to put a kapton tape to insulate the two boards
 
 <img src="https://github.com/SphericalCowww/ROS_leggedRobot_testBed/blob/main/powerSystem.png" height="400"> 
@@ -61,6 +61,8 @@ There are quite a few screws in difficult locations with the current design, whi
 <img src="https://github.com/SphericalCowww/CubicDoggo/blob/main/fig_tools.png" height="200">
 
 ## Running a Single Servo on ROS2
+
+Install ROS2 Jazzy according to [GitHub](https://github.com/SphericalCowww/ROS_init_practice).
 
 ### Setting the servo IDs
 
