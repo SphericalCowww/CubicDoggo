@@ -13,7 +13,7 @@ Overview: thanks to the Blue Robe AI channel <a href="https://www.youtube.com/wa
 
 ### 3D printing
 
-The 3D printer model VOXELAB Aquila X2 is used, but as long as it prints PLA, it's good. All the FreeCAD files can be found here: <a href="https://github.com/SphericalCowww/CubicDoggo/tree/main/src/my_robot_description/mesh/CADv1">link</a>.
+The 3D printer model VOXELAB Aquila X2 is used with the Cura slicer, but as long as PLA can be printed. All the FreeCAD files can be found here: <a href="https://github.com/SphericalCowww/CubicDoggo/tree/main/src/my_robot_description/mesh/CADv1">link</a>.
 
 ### Hardware requirements
 
