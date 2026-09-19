@@ -60,7 +60,7 @@ There are quite a few screws in difficult locations with the current design, whi
 
 <img src="https://github.com/SphericalCowww/CubicDoggo/blob/main/fig_tools.png" height="200">
 
-## Running a Single Servo on ROS2
+## Running servos
 
 Install ROS2 Jazzy according to [GitHub](https://github.com/SphericalCowww/ROS_init_practice).
 
@@ -168,7 +168,7 @@ Update to run the firmware with proper permissions to avoid latency:
     ---------- 
     sudo reboot
 
-## Running a single leg on ROS2
+## Running a leg
 
 ### Assembly and Launching URDF
 
@@ -244,7 +244,7 @@ Then run:
     ## Context => Planning Library => ompl
     ## Planning => Goal State: pose1 => Plan => Execute
 
-## Running full robot
+## Running the full robot
 
 ### Assembly and Launching URDF
 
