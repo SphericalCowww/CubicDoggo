@@ -8,6 +8,7 @@ Demos: derived from (<a href="https://github.com/SphericalCowww/ROS_leggedRobot_
 
 Overview: thanks to the Blue Robe AI channel <a href="https://www.youtube.com/watch?v=N3qaMB3oIC4">YouTube</a>.
 
+Requirement: installing ROS2 Jazzy on a Raspberry Pi according to [GitHub](https://github.com/SphericalCowww/ROS_init_practice).
 
 ## Ingredients
 
@@ -62,8 +63,6 @@ There are quite a few screws in difficult locations with the current design, whi
 
 ## Running servos
 
-Install ROS2 Jazzy according to [GitHub](https://github.com/SphericalCowww/ROS_init_practice).
-
 ### Setting the servo IDs
 
 Connecting servo to U2D2 according to <a href="https://www.youtube.com/watch?v=FIj_NULYOKQ">YouTube</a>:
@@ -95,7 +94,7 @@ For the 12 servos, the IDs are set as 11, 12, 13, 21, 22, 23, 31, 32, 33, 41, 42
 
 ### Installing the <a href="https://github.com/ROBOTIS-GIT/DynamixelSDK">dynamixel-sdk</a> and <a href="https://github.com/ROBOTIS-GIT/dynamixel-workbench">dynamixel-workbench</a>
 
-Following <a href="https://github.com/SphericalCowww/ROS_init_practice">github</a> to install ROS. To install drivers for Dynamixel, 
+To install drivers for Dynamixel, 
 
     sudo apt install ros-jazzy-dynamixel-sdk* ros-jazzy-dynamixel-hardware* ros-jazzy-dynamixel-workbench*
     dpkg -l | grep dynamixel
